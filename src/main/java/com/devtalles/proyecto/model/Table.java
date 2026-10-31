@@ -8,4 +8,8 @@ import lombok.Data;
 public class Table {
     private int numberTable;
     private TableStatus tableStatus;
+
+    public Table(int numberTable) {
+        this.numberTable = numberTable;
+    }
 }
