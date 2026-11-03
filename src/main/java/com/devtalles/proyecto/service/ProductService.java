@@ -134,7 +134,7 @@ public class ProductService implements ProductRepository {
         restaurantRepositoryService.saveChanges();
     }
 
-    private Product getProductById(int idProduct) throws ProductNotFoundException {
+    public Product getProductById(int idProduct) throws ProductNotFoundException {
         return restaurantRepositoryService.getCategories()
                 .stream()
                 .flatMap(c -> c.getProducts().stream())

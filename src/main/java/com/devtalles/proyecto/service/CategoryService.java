@@ -2,6 +2,7 @@ package com.devtalles.proyecto.service;
 
 import com.devtalles.proyecto.exceptions.CategoryNotFoundException;
 import com.devtalles.proyecto.exceptions.InvalidCategoryException;
+import com.devtalles.proyecto.exceptions.InvalidTextException;
 import com.devtalles.proyecto.interfaces.CategoryRepository;
 import com.devtalles.proyecto.model.Category;
 import com.devtalles.proyecto.repository.RestaurantRepositoryService;
@@ -15,7 +16,7 @@ public class CategoryService implements CategoryRepository {
     }
 
     @Override
-    public void addCategory(String categoryName) throws InvalidCategoryException {
+    public void addCategory(String categoryName) throws InvalidCategoryException, InvalidTextException {
         Validates.validateText(categoryName, "El nombre de la categoría no puede estar vacío");
 
         String nameFormatted = categoryName.trim();
@@ -33,7 +34,7 @@ public class CategoryService implements CategoryRepository {
     }
 
     @Override
-    public Category getCategoryByName(String categoryName) throws InvalidCategoryException, CategoryNotFoundException {
+    public Category getCategoryByName(String categoryName) throws CategoryNotFoundException, InvalidTextException {
         Validates.validateText(categoryName, "El nombre de la categoría no puede estar vacío");
 
         String nameFormatted = categoryName.trim();
@@ -45,7 +46,7 @@ public class CategoryService implements CategoryRepository {
                 .orElseThrow( () -> new CategoryNotFoundException("La categoría " + nameFormatted + "no existe"));
     }
 
-    public void updateCategory (String oldName, String newName) throws InvalidCategoryException, CategoryNotFoundException {
+    public void updateCategory (String oldName, String newName) throws InvalidCategoryException, CategoryNotFoundException, InvalidTextException {
         Validates.validateText(newName, "El nuevo nombre de la categoría no puede estar vacío");
 
         String formattedOldName = oldName.trim();
@@ -71,7 +72,7 @@ public class CategoryService implements CategoryRepository {
         restaurantRepositoryService.saveChanges();
     }
 
-    public void deleteCategoryName(String categoryName) throws InvalidCategoryException, CategoryNotFoundException {
+    public void deleteCategoryName(String categoryName) throws CategoryNotFoundException, InvalidTextException {
         Validates.validateText(categoryName, "El nombre de la categoría no puede estar vacío");
 
         String nameFormatted = categoryName.trim();

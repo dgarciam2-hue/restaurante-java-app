@@ -19,6 +19,10 @@ public class RestaurantRepositoryService {
     public List<Table> getTables() { return restaurant.getTables(); }
     public List<Discount> getDiscounts() { return restaurant.getDiscounts(); }
     public List<Customer> getCustomers() { return restaurant.getCustomers(); }
+    public List<Order> getOrders() { return restaurant.getOrders(); }
+    public List<Invoice> getInvoices() {
+        return restaurant.getInvoices();
+    }
 
     public void saveChanges() {
         RestaurantPersistence.saveRestaurant(restaurant);
