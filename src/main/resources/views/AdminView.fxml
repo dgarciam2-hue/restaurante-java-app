@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<?import javafx.geometry.Insets?>
+
+<HBox prefHeight="700.0" prefWidth="1050.0" spacing="25.0" styleClass="root"
+      xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.devtalles.proyecto.controller.AdminController">
+
+    <VBox prefWidth="240.0" spacing="10.0" styleClass="sidebar">
+        <padding>
+            <Insets left="16.0" top="24.0" bottom="24.0" right="16.0"/>
+        </padding>
+
+        <HBox alignment="CENTER_LEFT" spacing="12.0">
+            <padding>
+                <Insets left="10.0" bottom="10.0"/>
+            </padding>
+            <StackPane styleClass="logo-restaurant">
+                <StackPane styleClass="icon-restaurant"/>
+            </StackPane>
+            <Label style="-fx-font-weight: bold; -fx-font-size: 20px; -fx-text-fill: #ffffff;" text="Sazón" />
+        </HBox>
+
+        <Button maxWidth="Infinity" onAction="#handleCategories" styleClass="sidebar-btn" text="Categorías">
+            <graphic>
+                <StackPane styleClass="icon-svg, icon-tag"/>
+            </graphic>
+        </Button>
+
+        <Button maxWidth="Infinity" onAction="#handleTables" styleClass="sidebar-btn" text="Mesas">
+            <graphic>
+                <StackPane styleClass="icon-svg, icon-table"/>
+            </graphic>
+        </Button>
+
+        <Button maxWidth="Infinity" onAction="#handleDiscounts" styleClass="sidebar-btn" text="Descuentos">
+            <graphic>
+                <StackPane styleClass="icon-svg, icon-percentage"/>
+            </graphic>
+        </Button>
+
+        <Button maxWidth="Infinity" onAction="#handleInvoices" styleClass="sidebar-btn" text="Facturas">
+            <graphic>
+                <StackPane styleClass="icon-svg, icon-invoice"/>
+            </graphic>
+        </Button>
+
+        <Region VBox.vgrow="ALWAYS"/>
+
+        <Button maxWidth="Infinity" onAction="#handleUser" styleClass="user-card-btn">
+            <graphic>
+                <HBox alignment="CENTER_LEFT" spacing="12.0">
+                    <StackPane styleClass="user-avatar">
+                        <Label fx:id="lblUserInitial" styleClass="avatar-text" text="?" />
+                    </StackPane>
+
+                    <VBox alignment="CENTER_LEFT" spacing="2.0">
+                        <Label fx:id="lblUserName" styleClass="user-name" text="Cargando..." />
+                        <Label fx:id="lblUserStatus" styleClass="user-status" text="Cargando..." />
+                    </VBox>
+                </HBox>
+            </graphic>
+        </Button>
+
+    </VBox>
+
+    <StackPane HBox.hgrow="ALWAYS" style="-fx-padding: 24.0;">
+
+        <VBox fx:id="viewCategories" spacing="20.0">
+            <HBox alignment="CENTER_LEFT" spacing="16.0">
+                <VBox spacing="4.0" HBox.hgrow="ALWAYS">
+                    <Label text="Categorías" styleClass="header-title"/>
+                    <Label text="Organiza el menú del restaurante." styleClass="header-subtitle" />
+                </VBox>
+
+                <Button onAction="#handleOpenNewCategoryModal" text="+  Nueva categoría" styleClass="create-object" />
+            </HBox>
+
+            <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS" styleClass="custom-scroll-pane">
+                <VBox fx:id="categoriesContainer" spacing="12.0"/>
+            </ScrollPane>
+        </VBox>
+
+        <StackPane fx:id="modalOverlay" managed="false" visible="false" styleClass="modal-overlay">
+            <VBox maxWidth="400.0" spacing="18.0" styleClass="modal-card">
+                <HBox alignment="CENTER_LEFT">
+                    <Label fx:id="lblModalTitle" styleClass="modal-title" text="Nueva Categoría" />
+                    <Region HBox.hgrow="ALWAYS" />
+                    <Button onAction="#handleCloseModal" styleClass="btn-icon-close" text="✕" />
+                </HBox>
+                <VBox spacing="8.0">
+                    <Label styleClass="form-label" text="Nombre de la categoría" />
+                    <TextField fx:id="txtCategoryName" promptText="Ej. Bebidas, Postres..." styleClass="custom-text-field" />
+                </VBox>
+                <HBox alignment="CENTER_RIGHT" spacing="12.0">
+                    <Button onAction="#handleCloseModal" styleClass="btn-secondary" text="Cancelar" />
+                    <Button onAction="#handleAddCategory" styleClass="btn-primary" text="Guardar" />
+                </HBox>
+            </VBox>
+        </StackPane>
+
+        <VBox fx:id="viewTables" spacing="20.0" visible="false" managed="false">
+            <HBox alignment="CENTER_LEFT" spacing="16.0">
+                <VBox spacing="4.0" HBox.hgrow="ALWAYS">
+                    <Label text="Mesas" styleClass="header-title"/>
+                    <Label text="Organiza el menú del restaurante." styleClass="header-subtitle" />
+                </VBox>
+
+                <Button text="+  Nueva mesa" styleClass="create-object" />
+            </HBox>
+        </VBox>
+
+        <VBox fx:id="viewDiscounts" spacing="20.0" visible="false" managed="false">
+            <HBox alignment="CENTER_LEFT" spacing="16.0">
+                <VBox spacing="4.0" HBox.hgrow="ALWAYS">
+                    <Label text="Descuentos" styleClass="header-title"/>
+                    <Label text="Organiza el menú del restaurante." styleClass="header-subtitle" />
+                </VBox>
+
+                <Button text="+  Nuevo descuento" styleClass="create-object" />
+            </HBox>
+        </VBox>
+
+        <VBox fx:id="viewInvoices" spacing="20.0" visible="false" managed="false">
+            <HBox alignment="CENTER_LEFT" spacing="16.0">
+                <VBox spacing="4.0" HBox.hgrow="ALWAYS">
+                    <Label text="Facturas" styleClass="header-title"/>
+                    <Label text="Organiza el menú del restaurante." styleClass="header-subtitle" />
+                </VBox>
+            </HBox>
+        </VBox>
+
+
+    </StackPane>
+
+</HBox>

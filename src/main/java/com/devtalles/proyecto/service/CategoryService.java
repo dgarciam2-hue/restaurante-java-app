@@ -8,6 +8,8 @@ import com.devtalles.proyecto.model.Category;
 import com.devtalles.proyecto.repository.RestaurantRepositoryService;
 import com.devtalles.proyecto.utils.Validates;
 
+import java.util.List;
+
 public class CategoryService implements CategoryRepository {
     private final RestaurantRepositoryService restaurantRepositoryService;
 
@@ -16,7 +18,7 @@ public class CategoryService implements CategoryRepository {
     }
 
     @Override
-    public void addCategory(String categoryName) throws InvalidCategoryException, InvalidTextException {
+    public Category addCategory(String categoryName) throws InvalidCategoryException, InvalidTextException {
         Validates.validateText(categoryName, "El nombre de la categoría no puede estar vacío");
 
         String nameFormatted = categoryName.trim();
@@ -29,8 +31,12 @@ public class CategoryService implements CategoryRepository {
             throw new InvalidCategoryException("La categoría " + nameFormatted + "ya existe");
         }
 
-        restaurantRepositoryService.getCategories().add(new Category(nameFormatted));
+        Category category = new Category(nameFormatted);
+
+        restaurantRepositoryService.getCategories().add(category);
         restaurantRepositoryService.saveChanges();
+
+        return category;
     }
 
     @Override
@@ -85,5 +91,9 @@ public class CategoryService implements CategoryRepository {
         }
 
         restaurantRepositoryService.saveChanges();
+    }
+
+    public List<Category> getCategories() {
+        return restaurantRepositoryService.getCategories();
     }
 }

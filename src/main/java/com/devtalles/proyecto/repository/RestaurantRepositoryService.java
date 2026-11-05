@@ -23,6 +23,9 @@ public class RestaurantRepositoryService {
     public List<Invoice> getInvoices() {
         return restaurant.getInvoices();
     }
+    public List<User> getUsers() {
+        return restaurant.getUsers();
+    }
 
     public void saveChanges() {
         RestaurantPersistence.saveRestaurant(restaurant);

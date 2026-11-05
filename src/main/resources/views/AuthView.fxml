@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Hyperlink?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.shape.Circle?>
+<?import javafx.scene.text.Text?>
+<?import javafx.scene.text.TextFlow?>
+
+<VBox prefHeight="700.0" prefWidth="1050.0" spacing="25.0" styleClass="root"
+      xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.devtalles.proyecto.controller.AuthController">
+    <padding>
+        <Insets bottom="30.0" left="40.0" right="40.0" top="25.0" />
+    </padding>
+
+    <!-- 1. BARRA SUPERIOR (LOGO Y AYUDA) -->
+    <HBox alignment="CENTER_LEFT">
+        <HBox alignment="CENTER_LEFT" spacing="10.0">
+            <StackPane styleClass="logo-restaurant">
+                <StackPane styleClass="icon-restaurant"/>
+            </StackPane>
+            <Label style="-fx-font-weight: bold; -fx-font-size: 20px; -fx-text-fill: #ffffff;" text="Sazón" />
+        </HBox>
+
+        <Region HBox.hgrow="ALWAYS" />
+
+        <Button styleClass="btn-help-pill" text="Ayuda" />
+    </HBox>
+
+    <!-- 2. CONTENIDO PRINCIPAL (COLUMNA IZQUIERDA Y DERECHA) -->
+    <HBox spacing="50.0" VBox.vgrow="ALWAYS">
+
+        <!-- COLUMNA IZQUIERDA: PRESENTACIÓN Y CARACTERÍSTICAS -->
+        <VBox maxWidth="540.0" spacing="22.0" HBox.hgrow="ALWAYS" VBox.vgrow="ALWAYS">
+
+            <!-- Insignia / Badge -->
+            <HBox alignment="CENTER_LEFT" maxWidth="-Infinity" spacing="8.0" styleClass="hero-badge">
+                <Circle fill="#ff522b" radius="4.0" />
+                <Label styleClass="badge-text" text="Gestión de restaurante, sin complicaciones" />
+            </HBox>
+
+            <!-- Título Principal -->
+            <TextFlow lineSpacing="2.0">
+                <Text styleClass="hero-title-white" text="Cada mesa, cada&#10;pedido, " />
+                <Text styleClass="hero-title-orange" text="bajo control." />
+            </TextFlow>
+
+            <!-- Subtítulo -->
+            <Label styleClass="hero-subtitle" text="Mesas, pedidos, descuentos y facturas en PDF en una sola app, pensada para que el servicio fluya." wrapText="true" />
+
+            <!-- CARDA 1: Mesas en vivo (Ancho completo) -->
+            <VBox spacing="10.0" styleClass="feature-card">
+                <HBox alignment="CENTER_LEFT" spacing="8.0">
+                    <Label styleClass="feature-icon" text="⊞" />
+                    <Label styleClass="feature-card-title" text="Mesas en vivo" />
+                </HBox>
+                <Label styleClass="feature-card-desc" text="Mira de un vistazo qué mesas están libres, ocupadas o en facturación." />
+
+                <HBox spacing="8.0" style="-fx-padding: 4 0 0 0;">
+                    <HBox alignment="CENTER_LEFT" spacing="6.0" styleClass="pill-tag">
+                        <Circle fill="#22c55e" radius="3.5" />
+                        <Label styleClass="pill-tag-text" text="Mesa 1 · Libre" />
+                    </HBox>
+                    <HBox alignment="CENTER_LEFT" spacing="6.0" styleClass="pill-tag">
+                        <Circle fill="#eab308" radius="3.5" />
+                        <Label styleClass="pill-tag-text" text="Mesa 2 · Ocupada" />
+                    </HBox>
+                    <HBox alignment="CENTER_LEFT" spacing="6.0" styleClass="pill-tag">
+                        <Circle fill="#6366f1" radius="3.5" />
+                        <Label styleClass="pill-tag-text" text="Mesa 3 · Facturando" />
+                    </HBox>
+                </HBox>
+            </VBox>
+
+            <!-- FILA DE TARJETAS SECUNDARIAS (2 Columnas) -->
+            <HBox spacing="15.0">
+                <!-- CARDA 2: Descuentos -->
+                <VBox spacing="8.0" styleClass="feature-card" HBox.hgrow="ALWAYS">
+                    <HBox alignment="CENTER_LEFT" spacing="8.0">
+                        <Label styleClass="feature-icon" text="\%" />
+                        <Label styleClass="feature-card-title" text="Descuentos" />
+                    </HBox>
+                    <Label styleClass="feature-card-desc" text="Promos por día de la semana, sin tocar el código." wrapText="true" />
+                    <HBox alignment="CENTER_LEFT" maxWidth="-Infinity" styleClass="pill-tag">
+                        <Label styleClass="pill-tag-text" text="Martes · -20%" />
+                    </HBox>
+                </VBox>
+
+                <!-- CARDA 3: Facturas -->
+                <VBox spacing="8.0" styleClass="feature-card" HBox.hgrow="ALWAYS">
+                    <HBox alignment="CENTER_LEFT" spacing="8.0">
+                        <Label styleClass="feature-icon" text="📄" />
+                        <Label styleClass="feature-card-title" text="Facturas" />
+                    </HBox>
+                    <Label styleClass="feature-card-desc" text="Cierra el pedido y genera el PDF al instante." wrapText="true" />
+                    <HBox alignment="CENTER_LEFT" maxWidth="-Infinity" styleClass="pill-tag">
+                        <Label styleClass="pill-tag-text" text="factura_101.pdf" />
+                    </HBox>
+                </VBox>
+            </HBox>
+
+        </VBox>
+
+        <!-- COLUMNA DERECHA: TARJETA DE AUTENTICACIÓN -->
+        <VBox alignment="CENTER" HBox.hgrow="ALWAYS">
+            <VBox maxWidth="410.0" spacing="22.0" styleClass="auth-card">
+                <padding>
+                    <Insets bottom="35.0" left="30.0" right="30.0" top="30.0" />
+                </padding>
+
+                <!-- Pestañas (Login / Registro) -->
+                <HBox styleClass="tab-container">
+                    <Button fx:id="btnTabLogin" maxWidth="Infinity" onAction="#showLoginForm" styleClass="tab-button-active" text="Iniciar sesión" HBox.hgrow="ALWAYS" />
+                    <Button fx:id="btnTabRegister" maxWidth="Infinity" onAction="#showRegisterForm" styleClass="tab-button-inactive" text="Registrarse" HBox.hgrow="ALWAYS" />
+                </HBox>
+
+                <StackPane>
+                    <!-- FORMULARIO 1: INICIAR SESIÓN -->
+                    <VBox fx:id="loginBox" spacing="16.0">
+                        <VBox spacing="4.0">
+                            <Label styleClass="form-title" text="Bienvenido de nuevo" />
+                            <Label styleClass="form-subtitle" text="Ingresa tu usuario y tu correo para entrar." />
+                        </VBox>
+
+                        <VBox spacing="6.0">
+                            <Label styleClass="input-label" text="Nombre de usuario" />
+                            <TextField fx:id="txtLoginUserName" promptText="tu_usuario" styleClass="custom-text-field" />
+                        </VBox>
+
+                        <VBox spacing="6.0">
+                            <Label styleClass="input-label" text="Correo electrónico" />
+                            <TextField fx:id="txtLoginEmail" promptText="tu@correo.com" styleClass="custom-text-field" />
+                        </VBox>
+
+                        <Button maxWidth="Infinity" onAction="#handleLogin" styleClass="btn-primary" text="Iniciar sesión" />
+
+                        <HBox alignment="CENTER" spacing="4.0">
+                            <Label styleClass="footer-text" text="¿Aún no tienes cuenta?" />
+                            <Hyperlink onAction="#showRegisterForm" styleClass="link-orange" text="Regístrate" />
+                        </HBox>
+                    </VBox>
+
+                    <!-- FORMULARIO 2: REGISTRARSE -->
+                    <VBox fx:id="registerBox" managed="false" spacing="16.0" visible="false">
+                        <VBox spacing="4.0">
+                            <Label styleClass="form-title" text="Crea tu cuenta" />
+                            <Label styleClass="form-subtitle" text="Solo necesitas un usuario y un correo." />
+                        </VBox>
+
+                        <VBox spacing="6.0">
+                            <Label styleClass="input-label" text="Nombre de usuario" />
+                            <TextField fx:id="txtRegisterUserName" promptText="tu_usuario" styleClass="custom-text-field" />
+                        </VBox>
+
+                        <VBox spacing="6.0">
+                            <Label styleClass="input-label" text="Correo electrónico" />
+                            <TextField fx:id="txtRegisterEmail" promptText="tu@correo.com" styleClass="custom-text-field" />
+                        </VBox>
+
+                        <Button maxWidth="Infinity" onAction="#handleRegister" styleClass="btn-primary" text="Registrarse" />
+
+                        <HBox alignment="CENTER" spacing="4.0">
+                            <Label styleClass="footer-text" text="¿Ya tienes una cuenta?" />
+                            <Hyperlink onAction="#showLoginForm" styleClass="link-orange" text="Inicia sesión" />
+                        </HBox>
+                    </VBox>
+
+                </StackPane>
+            </VBox>
+        </VBox>
+    </HBox>
+</VBox>

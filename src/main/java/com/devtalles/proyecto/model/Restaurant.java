@@ -13,6 +13,7 @@ public class Restaurant {
     private List<Customer> customers;
     private List<Discount> discounts;
     private List<Invoice> invoices;
+    private List<User> users;
 
     public Restaurant() {
         categories = new ArrayList<>();
@@ -21,5 +22,6 @@ public class Restaurant {
         customers = new ArrayList<>();
         discounts = new ArrayList<>();
         invoices = new ArrayList<>();
+        users = new ArrayList<>();
     }
 }
