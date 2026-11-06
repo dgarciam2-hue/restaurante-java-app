@@ -5,6 +5,7 @@ import com.devtalles.proyecto.exceptions.UserAlreadyExistsException;
 import com.devtalles.proyecto.model.RoleUser;
 import com.devtalles.proyecto.model.User;
 import com.devtalles.proyecto.service.CategoryService;
+import com.devtalles.proyecto.service.TableService;
 import com.devtalles.proyecto.service.UserService;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -37,6 +38,8 @@ public class AuthController {
     private UserService userService;
     @Setter
     private CategoryService categoryService;
+    @Setter
+    private TableService tableService;
 
     @FXML
     public void showRegisterForm() {
@@ -85,6 +88,7 @@ public class AuthController {
                     AdminController adminController = loader.getController();
                     adminController.setUserService(this.userService);
                     adminController.setCategoryService(this.categoryService);
+                    adminController.setTableService(this.tableService);
                     adminController.setLoggedUser(user);
 
                     Stage currentStage = (Stage) txtLoginUserName.getScene().getWindow();

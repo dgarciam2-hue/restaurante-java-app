@@ -87,20 +87,20 @@
             </ScrollPane>
         </VBox>
 
-        <StackPane fx:id="modalOverlay" managed="false" visible="false" styleClass="modal-overlay">
+        <StackPane fx:id="modalCategoryOverlay" managed="false" visible="false" styleClass="modal-overlay">
             <VBox maxWidth="400.0" spacing="18.0" styleClass="modal-card">
                 <HBox alignment="CENTER_LEFT">
-                    <Label fx:id="lblModalTitle" styleClass="modal-title" text="Nueva Categoría" />
+                    <Label fx:id="lblCategoryModalTitle" styleClass="modal-title" text="Nueva Categoría" />
                     <Region HBox.hgrow="ALWAYS" />
-                    <Button onAction="#handleCloseModal" styleClass="btn-icon-close" text="✕" />
+                    <Button onAction="#handleCloseCategoryModal" styleClass="btn-icon-close" text="✕" />
                 </HBox>
                 <VBox spacing="8.0">
                     <Label styleClass="form-label" text="Nombre de la categoría" />
                     <TextField fx:id="txtCategoryName" promptText="Ej. Bebidas, Postres..." styleClass="custom-text-field" />
                 </VBox>
                 <HBox alignment="CENTER_RIGHT" spacing="12.0">
-                    <Button onAction="#handleCloseModal" styleClass="btn-secondary" text="Cancelar" />
-                    <Button onAction="#handleAddCategory" styleClass="btn-primary" text="Guardar" />
+                    <Button onAction="#handleCloseCategoryModal" styleClass="btn-secondary" text="Cancelar" />
+                    <Button onAction="#handleAddCategory" styleClass="btn-primary" text="Guardar categoría" />
                 </HBox>
             </VBox>
         </StackPane>
@@ -112,9 +112,30 @@
                     <Label text="Organiza el menú del restaurante." styleClass="header-subtitle" />
                 </VBox>
 
-                <Button text="+  Nueva mesa" styleClass="create-object" />
+                <Button onAction="#handleOpenNewTableModal" text="+  Nueva mesa" styleClass="create-object" />
             </HBox>
+            <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS" styleClass="custom-scroll-pane">
+                <VBox fx:id="tablesContainer" spacing="12.0"/>
+            </ScrollPane>
         </VBox>
+
+        <StackPane fx:id="modalTableOverlay" managed="false" visible="false" styleClass="modal-overlay">
+            <VBox maxWidth="400.0" spacing="18.0" styleClass="modal-card">
+                <HBox alignment="CENTER_LEFT">
+                    <Label fx:id="lblTableModalTitle" styleClass="modal-title" text="Nueva mesa" />
+                    <Region HBox.hgrow="ALWAYS" />
+                    <Button onAction="#handleCloseTableModal" styleClass="btn-icon-close" text="✕" />
+                </HBox>
+                <VBox spacing="8.0">
+                    <Label styleClass="form-label" text="Número de mesa" />
+                    <TextField fx:id="txtTableNumber" promptText="Ej. 1, 2, 3, ..." styleClass="custom-text-field" />
+                </VBox>
+                <HBox alignment="CENTER_RIGHT" spacing="12.0">
+                    <Button onAction="#handleCloseTableModal" styleClass="btn-secondary" text="Cancelar" />
+                    <Button onAction="#handleAddTable" styleClass="btn-primary" text="Guardar mesa" />
+                </HBox>
+            </VBox>
+        </StackPane>
 
         <VBox fx:id="viewDiscounts" spacing="20.0" visible="false" managed="false">
             <HBox alignment="CENTER_LEFT" spacing="16.0">

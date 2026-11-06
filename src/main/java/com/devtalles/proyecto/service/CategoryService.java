@@ -28,7 +28,7 @@ public class CategoryService implements CategoryRepository {
                 .anyMatch(n -> n.getCategoryName().equalsIgnoreCase(categoryName));
 
         if(exist) {
-            throw new InvalidCategoryException("La categoría " + nameFormatted + "ya existe");
+            throw new InvalidCategoryException("La categoría " + nameFormatted + " ya existe");
         }
 
         Category category = new Category(nameFormatted);

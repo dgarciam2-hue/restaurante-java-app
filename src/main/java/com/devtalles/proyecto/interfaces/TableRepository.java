@@ -13,4 +13,5 @@ public interface TableRepository {
     public List<Table> getAvailablesTables();
     public TableStatus getStatusTable(int numberTable) throws InvalidNumberException, InvalidTableException, TableNotFoundException;
     public void deleteTable(int numberTable) throws InvalidTableException, TableNotFoundException;
+    public List<Table> getTables();
 }

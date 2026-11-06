@@ -2,10 +2,14 @@ package com.devtalles.proyecto.controller;
 
 import com.devtalles.proyecto.exceptions.CategoryNotFoundException;
 import com.devtalles.proyecto.exceptions.InvalidCategoryException;
+import com.devtalles.proyecto.exceptions.InvalidTableException;
 import com.devtalles.proyecto.exceptions.InvalidTextException;
 import com.devtalles.proyecto.model.Category;
+import com.devtalles.proyecto.model.Table;
+import com.devtalles.proyecto.model.TableStatus;
 import com.devtalles.proyecto.model.User;
 import com.devtalles.proyecto.service.CategoryService;
+import com.devtalles.proyecto.service.TableService;
 import com.devtalles.proyecto.service.UserService;
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
@@ -16,6 +20,7 @@ import lombok.Setter;
 import java.util.List;
 
 public class AdminController {
+
     @Setter
     private UserService userService;
 
@@ -26,6 +31,9 @@ public class AdminController {
         renderCategories();
     }
 
+    @Setter
+    private TableService tableService;
+
     @FXML private Label lblUserName;
     @FXML private Label lblUserInitial;
     @FXML private Label lblUserStatus;
@@ -34,11 +42,21 @@ public class AdminController {
     @FXML private VBox viewTables;
     @FXML private VBox viewDiscounts;
     @FXML private VBox viewInvoices;
+
     @FXML private TextField txtCategoryName;
-    @FXML private StackPane modalOverlay;
+    @FXML public TextField txtTableNumber;
+
+    @FXML private StackPane modalCategoryOverlay;
+    @FXML public StackPane modalTableOverlay;
+
     @FXML private VBox categoriesContainer;
-    @FXML private Label lblModalTitle;
+    @FXML public VBox tablesContainer;
+
+    @FXML private Label lblCategoryModalTitle;
+    @FXML private Label lblTableModalTitle;
+
     private Category editingCategory = null;
+    private Table editingTable = null;
 
     public void setLoggedUser(User user) {
         if(user != null && user.getUserName() != null) {
@@ -59,23 +77,27 @@ public class AdminController {
     @FXML
     public void handleOpenNewCategoryModal() {
         this.editingCategory = null;
-        if (lblModalTitle != null) lblModalTitle.setText("Nueva Categoría");
+        if (lblCategoryModalTitle != null) lblCategoryModalTitle.setText("Nueva Categoría");
         txtCategoryName.clear();
-        showModal();
+        modalCategoryOverlay.setVisible(true);
+        modalCategoryOverlay.setManaged(true);
+        txtCategoryName.requestFocus();
     }
 
     @FXML
     public void handleOpenEditCategoryModal(Category category) {
         this.editingCategory = category;
-        if (lblModalTitle != null) lblModalTitle.setText("Editar Categoría");
+        if (lblCategoryModalTitle != null) lblCategoryModalTitle.setText("Editar Categoría");
         txtCategoryName.setText(category.getCategoryName());
-        showModal();
+        modalCategoryOverlay.setVisible(true);
+        modalCategoryOverlay.setManaged(true);
+        txtCategoryName.requestFocus();
     }
 
     @FXML
-    public void handleCloseModal() {
-        modalOverlay.setVisible(false);
-        modalOverlay.setManaged(false);
+    public void handleCloseCategoryModal() {
+        modalCategoryOverlay.setVisible(false);
+        modalCategoryOverlay.setManaged(false);
     }
 
     @FXML
@@ -94,7 +116,7 @@ public class AdminController {
             }
 
             renderCategories();
-            handleCloseModal();
+            handleCloseCategoryModal();
 
         } catch (InvalidTextException | InvalidCategoryException | CategoryNotFoundException e) {
             showAlert(Alert.AlertType.WARNING, "Error en registro", e.getMessage());
@@ -134,6 +156,75 @@ public class AdminController {
     @FXML
     public void handleTables() {
         showSection(viewTables);
+        renderTables();
+    }
+
+    @FXML
+    public void handleOpenNewTableModal() {
+        this.editingTable = null;
+        if (lblTableModalTitle != null) lblTableModalTitle.setText("Nueva mesa");
+        txtTableNumber.clear();
+        modalTableOverlay.setManaged(true);
+        modalTableOverlay.setVisible(true);
+        modalTableOverlay.requestFocus();
+    }
+
+    @FXML
+    public void handleCloseTableModal() {
+        modalTableOverlay.setManaged(false);
+        modalTableOverlay.setVisible(false);
+    }
+
+    @FXML
+    public void handleAddTable(){
+        String numberTable = txtTableNumber.getText().trim();
+
+        if(numberTable.isEmpty()) {
+            showAlert(Alert.AlertType.WARNING, "Campos incompletos", "Por favor completa todos los campos.");
+        }
+
+        try {
+            int number = Integer.parseInt(numberTable);
+            tableService.addTable(number);
+            showAlert(Alert.AlertType.INFORMATION, "Registro Exitoso",
+                    "Número de mesa registrada: " + number);
+
+            renderTables();
+            handleCloseTableModal();
+
+        } catch (InvalidTableException e) {
+            showAlert(Alert.AlertType.WARNING, "Error en registro", e.getMessage());
+        }
+    }
+
+    public void handleDeleteTable(Table table) {
+        Alert confirmAlert = new Alert(Alert.AlertType.CONFIRMATION);
+        confirmAlert.setTitle("Confirmar eliminación");
+        confirmAlert.setHeaderText(null);
+        confirmAlert.setContentText("¿Estás seguro de que deseas eliminar la mesa '" + table.getNumberTable() + "'?");
+
+        confirmAlert.showAndWait().ifPresent(response -> {
+            if (response == ButtonType.OK) {
+                try {
+                    tableService.deleteTable(table.getNumberTable());
+                    showAlert(Alert.AlertType.INFORMATION, "Éxito", "Mesa eliminada.");
+                    renderTables();
+                } catch (Exception e) {
+                    showAlert(Alert.AlertType.ERROR, "Error", e.getMessage());
+                }
+            }
+        });
+    }
+
+    public void renderTables() {
+        tablesContainer.getChildren().clear();
+
+        List<Table> tables = tableService.getTables();
+
+        for (Table table: tables) {
+            HBox cardNode = createTableCardNode(table);
+            tablesContainer.getChildren().add(cardNode);
+        }
     }
 
     @FXML
@@ -180,8 +271,8 @@ public class AdminController {
         card.setMaxWidth(Double.MAX_VALUE);
         card.setAlignment(Pos.CENTER_LEFT);
 
-        StackPane iconBox = createIconBox();
-        VBox infoBox = createInfoBox(category);
+        StackPane iconBox = createIconCategoryBox();
+        VBox infoBox = createInfoCategoryBox(category);
 
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
@@ -208,7 +299,33 @@ public class AdminController {
         return card;
     }
 
-    private StackPane createIconBox() {
+    private HBox createTableCardNode(Table table) {
+        HBox card = new HBox();
+        card.getStyleClass().add("category-item-card");
+        card.setMaxWidth(Double.MAX_VALUE);
+        card.setAlignment(Pos.CENTER_LEFT);
+
+        StackPane iconBox = createIconTableBox();
+        VBox infoBox = createInfoTableBox(table);
+
+        Region spacer = new Region();
+        HBox.setHgrow(spacer, Priority.ALWAYS);
+
+        Button btnDelete = new Button("🗑 Eliminar");
+        btnDelete.getStyleClass().add("btn-action-delete");
+        btnDelete.setOnAction(event -> {
+            event.consume();
+            handleDeleteTable(table);
+        });
+
+        HBox actionsBox = new HBox(8.0, btnDelete);
+        actionsBox.setAlignment(Pos.CENTER_RIGHT);
+
+        card.getChildren().addAll(iconBox, infoBox, spacer, actionsBox);
+        return card;
+    }
+
+    private StackPane createIconCategoryBox() {
         StackPane iconBox = new StackPane();
         iconBox.getStyleClass().add("category-icon-box");
 
@@ -219,7 +336,18 @@ public class AdminController {
         return iconBox;
     }
 
-    private VBox createInfoBox(Category category) {
+    private StackPane createIconTableBox() {
+        StackPane iconBox = new StackPane();
+        iconBox.getStyleClass().add("category-icon-box");
+
+        StackPane iconSvg = new StackPane();
+        iconSvg.getStyleClass().add("icon-table-orange");
+
+        iconBox.getChildren().add(iconSvg);
+        return iconBox;
+    }
+
+    private VBox createInfoCategoryBox(Category category) {
         VBox infoBox = new VBox(2.0);
         infoBox.setAlignment(Pos.CENTER_LEFT);
 
@@ -236,13 +364,50 @@ public class AdminController {
         return infoBox;
     }
 
-    private int getProductCount(Category category) {
-        return category.getProducts() != null ? category.getProducts().size() : 0;
+    private VBox createInfoTableBox(Table table) {
+        VBox infoBox = new VBox(4.0);
+        infoBox.setAlignment(Pos.CENTER_LEFT);
+
+        Label lblTitle = new Label("Mesa " + table.getNumberTable());
+        lblTitle.getStyleClass().add("category-title");
+
+        StackPane statusDot = new StackPane();
+        statusDot.setMinSize(8, 8);
+        statusDot.setMaxSize(8, 8);
+
+        Label lblStatus = new Label();
+        lblStatus.getStyleClass().add("category-subtitle");
+
+        TableStatus status = table.getTableStatus();
+
+        if (status != null) {
+            switch (status) {
+                case LIBRE -> {
+                    statusDot.setStyle("-fx-background-color: #22c55e; -fx-background-radius: 50%;"); // Verde
+                    lblStatus.setText("LIBRE");
+                    lblStatus.setStyle("-fx-text-fill: #22c55e; -fx-font-weight: bold; -fx-font-size: 12px;");
+                }
+                case OCUPADA -> {
+                    statusDot.setStyle("-fx-background-color: #ef4444; -fx-background-radius: 50%;"); // Rojo
+                    lblStatus.setText("OCUPADA");
+                    lblStatus.setStyle("-fx-text-fill: #ef4444; -fx-font-weight: bold; -fx-font-size: 12px;");
+                }
+                case EN_FACTURACIÓN -> { // Ajusta el nombre según la constante exacta en tu Enum TableStatus
+                    statusDot.setStyle("-fx-background-color: #3b82f6; -fx-background-radius: 50%;"); // Azul
+                    lblStatus.setText("EN FACTURACIÓN");
+                    lblStatus.setStyle("-fx-text-fill: #3b82f6; -fx-font-weight: bold; -fx-font-size: 12px;");
+                }
+            }
+        }
+
+        HBox statusContainer = new HBox(6.0, statusDot, lblStatus);
+        statusContainer.setAlignment(Pos.CENTER_LEFT);
+
+        infoBox.getChildren().addAll(lblTitle, statusContainer);
+        return infoBox;
     }
 
-    private void showModal() {
-        modalOverlay.setVisible(true);
-        modalOverlay.setManaged(true);
-        txtCategoryName.requestFocus();
+    private int getProductCount(Category category) {
+        return category.getProducts() != null ? category.getProducts().size() : 0;
     }
 }

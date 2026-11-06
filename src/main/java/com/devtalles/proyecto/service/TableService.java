@@ -31,7 +31,7 @@ public class TableService implements TableRepository {
             throw new InvalidTableException("Ya existe una mesa con este número: " + numberTable);
         }
 
-        restaurantRepositoryService.getTables().add(new Table(numberTable));
+        restaurantRepositoryService.getTables().add(new Table(numberTable, TableStatus.LIBRE));
         restaurantRepositoryService.saveChanges();
     }
 
@@ -68,5 +68,10 @@ public class TableService implements TableRepository {
         }
 
         restaurantRepositoryService.saveChanges();
+    }
+
+    @Override
+    public List<Table> getTables() {
+        return restaurantRepositoryService.getTables();
     }
 }
