@@ -84,7 +84,7 @@ public class ProductService implements ProductRepository {
                     .anyMatch(p -> p.getNameProduct().equalsIgnoreCase(formattedNewName) && p.getIdProduct() != idProduct);
 
             if (nameExists) {
-                throw new InvalidProductException("Ya existe otro producto con el nombre '" + formattedNewName + "'.");
+                throw new InvalidProductException("Ya existe otro producto con el ID '" + updatedProduct.getIdProduct() + "'.");
             }
         }
 

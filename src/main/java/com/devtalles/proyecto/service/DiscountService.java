@@ -215,4 +215,8 @@ public class DiscountService implements DiscountRepository {
 
         return formattedTarget;
     }
+
+    public List<Discount> getDiscounts() {
+        return restaurantRepositoryService.getDiscounts();
+    }
 }

@@ -2,9 +2,7 @@ package com.devtalles.proyecto;
 
 import com.devtalles.proyecto.controller.AuthController;
 import com.devtalles.proyecto.repository.RestaurantRepositoryService;
-import com.devtalles.proyecto.service.CategoryService;
-import com.devtalles.proyecto.service.TableService;
-import com.devtalles.proyecto.service.UserService;
+import com.devtalles.proyecto.service.*;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -24,7 +22,9 @@ public class MainApp extends Application {
         RestaurantRepositoryService restaurantRepositoryService = new RestaurantRepositoryService();
         UserService userService = new UserService(restaurantRepositoryService);
         CategoryService categoryService = new CategoryService(restaurantRepositoryService);
+        ProductService productService = new ProductService(restaurantRepositoryService);
         TableService tableService = new TableService(restaurantRepositoryService);
+        DiscountService discountService = new DiscountService(restaurantRepositoryService);
 
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/AuthView.fxml"));
         Parent root = loader.load();
@@ -32,7 +32,9 @@ public class MainApp extends Application {
         AuthController authController = loader.getController();
         authController.setUserService(userService);
         authController.setCategoryService(categoryService);
+        authController.setProductService(productService);
         authController.setTableService(tableService);
+        authController.setDiscountService(discountService);
 
         Scene scene = new Scene(root);
         primaryStage.setTitle("Sazón - Sistema de Gestión de Restaurante");

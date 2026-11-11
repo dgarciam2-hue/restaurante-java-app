@@ -15,5 +15,9 @@ public class OrderDetailValidator {
         if(amount > product.getStockProduct()) {
             throw new InvalidOrderDetailException("La cantidad no puede ser mayor al stock del producto");
         }
+
+        if(amount == product.getStockProduct()) {
+            product.setAvailabilityProduct(false);
+        }
     }
 }

@@ -68,6 +68,13 @@
             </graphic>
         </Button>
 
+        <Button fx:id="btnLogout" maxWidth="Infinity" onAction="#handleLogout" styleClass="sidebar-btn" text="Cerrar sesión"
+        managed="false" visible="false">
+            <graphic>
+                <StackPane styleClass="icon-svg, icon-logout"/>
+            </graphic>
+        </Button>
+
     </VBox>
 
     <StackPane HBox.hgrow="ALWAYS" style="-fx-padding: 24.0;">
@@ -100,7 +107,50 @@
                 </VBox>
                 <HBox alignment="CENTER_RIGHT" spacing="12.0">
                     <Button onAction="#handleCloseCategoryModal" styleClass="btn-secondary" text="Cancelar" />
-                    <Button onAction="#handleAddCategory" styleClass="btn-primary" text="Guardar categoría" />
+                    <Button onAction="#handleAddOrUpdateCategory" styleClass="btn-primary" text="Guardar categoría" />
+                </HBox>
+            </VBox>
+        </StackPane>
+
+        <VBox fx:id="viewProducts" spacing="20.0" managed="false" visible="false">
+            <HBox alignment="CENTER_LEFT" spacing="16.0">
+                <VBox spacing="4.0" HBox.hgrow="ALWAYS">
+                    <Label fx:id="lblContainerCategory" text="Categoría contenedora" styleClass="header-title"/>
+                    <Label fx:id="lblDescriptionContainerCategory" text="Categoría / " styleClass="header-subtitle" />
+                </VBox>
+                <Region HBox.hgrow="ALWAYS" />
+                <Button onAction="#handleCategories" styleClass="btn-back" text="Volver" />
+            </HBox>
+
+            <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS" styleClass="custom-scroll-pane">
+                <VBox fx:id="productsContainer" spacing="12.0"/>
+            </ScrollPane>
+        </VBox>
+
+        <StackPane fx:id="modalProductOverlay" managed="false" visible="false" styleClass="modal-overlay">
+            <VBox maxWidth="400.0" spacing="18.0" styleClass="modal-card">
+                <HBox alignment="CENTER_LEFT">
+                    <Label fx:id="lblProductModalTitle" styleClass="modal-title" text="Nuevo Producto" />
+                    <Region HBox.hgrow="ALWAYS" />
+                    <Button onAction="#handleCloseProductModal" styleClass="btn-icon-close" text="✕" />
+                </HBox>
+                <VBox spacing="8.0">
+                    <Label styleClass="form-label" text="Categoría contenedora" />
+                    <TextField fx:id="txtCategoryContainerName" promptText="Ej. Coca cola, Pizza Hawaina, ..." styleClass="custom-text-field" />
+                    <Label styleClass="form-label" text="Nombre del producto" />
+                    <TextField fx:id="txtProductName" promptText="Ej. Coca cola, Pizza Hawaina, ..." styleClass="custom-text-field" />
+                    <Label styleClass="form-label" text="Descripción del producto" />
+                    <TextField fx:id="txtProductDescription" styleClass="custom-text-field" />
+                    <Label styleClass="form-label" text="Precio del producto ($)" />
+                    <TextField fx:id="txtProductPrice" promptText="Ej. $20000, $15500, ..." styleClass="custom-text-field" />
+                    <Label styleClass="form-label" text="ID del producto" />
+                    <TextField fx:id="txtProductId" promptText="Ej. 101, 102, ..." styleClass="custom-text-field" />
+                    <Label styleClass="form-label" text="Stock del producto" />
+                    <TextField fx:id="txtProductStock" promptText="Ej. 20, 15, 50, ..." styleClass="custom-text-field" />
+                </VBox>
+                <HBox alignment="CENTER_RIGHT" spacing="12.0">
+                    <Button onAction="#handleCloseProductModal" styleClass="btn-secondary" text="Cancelar" />
+                    <Button onAction="#handleAddOrUpdateProduct" styleClass="btn-primary" text="Guardar producto" />
                 </HBox>
             </VBox>
         </StackPane>
@@ -122,7 +172,7 @@
         <StackPane fx:id="modalTableOverlay" managed="false" visible="false" styleClass="modal-overlay">
             <VBox maxWidth="400.0" spacing="18.0" styleClass="modal-card">
                 <HBox alignment="CENTER_LEFT">
-                    <Label fx:id="lblTableModalTitle" styleClass="modal-title" text="Nueva mesa" />
+                    <Label  styleClass="modal-title" text="Nueva mesa" />
                     <Region HBox.hgrow="ALWAYS" />
                     <Button onAction="#handleCloseTableModal" styleClass="btn-icon-close" text="✕" />
                 </HBox>
@@ -144,9 +194,77 @@
                     <Label text="Organiza el menú del restaurante." styleClass="header-subtitle" />
                 </VBox>
 
-                <Button text="+  Nuevo descuento" styleClass="create-object" />
+                <Button onAction="#handleOpenNewDiscountModal" text="+  Nuevo descuento" styleClass="create-object" />
             </HBox>
+            <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS" styleClass="custom-scroll-pane">
+                <VBox fx:id="discountsContainer" spacing="12.0"/>
+            </ScrollPane>
         </VBox>
+
+        <StackPane fx:id="modalDiscountOverlay" managed="false" visible="false" styleClass="modal-overlay">
+            <VBox maxWidth="400.0" spacing="18.0" styleClass="modal-card">
+                <HBox alignment="CENTER_LEFT">
+                    <Label fx:id="lblDiscountModalTitle" styleClass="modal-title" text="Nuevo descuento" />
+                    <Region HBox.hgrow="ALWAYS" />
+                    <Button onAction="#handleCloseDiscountModal" styleClass="btn-icon-close" text="✕" />
+                </HBox>
+                <VBox spacing="8.0">
+                    <Label styleClass="form-label" text="Id de Descuento" />
+                    <TextField fx:id="txtDiscountId" promptText="Ej. 101, 102, ... (Id > 0)" styleClass="custom-text-field" />
+                    <Label styleClass="form-label" text="Descripción" />
+                    <TextField fx:id="txtDiscountDescription" promptText="Ej. Martes de Hamburguesa" styleClass="custom-text-field" />
+
+                    <Label styleClass="form-label" text="Día de la Semana" />
+                    <fx:define>
+                        <ToggleGroup fx:id="dayOfWeekGroup" />
+                    </fx:define>
+                    <HBox spacing="6.0">
+                        <ToggleButton fx:id="tbMonday" text="L" toggleGroup="$dayOfWeekGroup"
+                                      selected="true" maxWidth="Infinity" HBox.hgrow="ALWAYS" styleClass="toggle-day-btn" />
+                        <ToggleButton fx:id="tbTuesday" text="Ma" toggleGroup="$dayOfWeekGroup"
+                                      maxWidth="Infinity" HBox.hgrow="ALWAYS" styleClass="toggle-day-btn" />
+                        <ToggleButton fx:id="tbWednesday" text="Mi" toggleGroup="$dayOfWeekGroup"
+                                      maxWidth="Infinity" HBox.hgrow="ALWAYS" styleClass="toggle-day-btn" />
+                        <ToggleButton fx:id="tbThursday" text="J" toggleGroup="$dayOfWeekGroup"
+                                      maxWidth="Infinity" HBox.hgrow="ALWAYS" styleClass="toggle-day-btn" />
+                        <ToggleButton fx:id="tbFriday" text="V" toggleGroup="$dayOfWeekGroup"
+                                      maxWidth="Infinity" HBox.hgrow="ALWAYS" styleClass="toggle-day-btn" />
+                        <ToggleButton fx:id="tbSaturday" text="S" toggleGroup="$dayOfWeekGroup"
+                                      maxWidth="Infinity" HBox.hgrow="ALWAYS" styleClass="toggle-day-btn" />
+                        <ToggleButton fx:id="tbSunday" text="D" toggleGroup="$dayOfWeekGroup"
+                                      maxWidth="Infinity" HBox.hgrow="ALWAYS" styleClass="toggle-day-btn" />
+                    </HBox>
+
+                    <Label styleClass="form-label" text="Alcance de Descuento" />
+                    <fx:define>
+                        <ToggleGroup fx:id="discountTypeGroup" />
+                    </fx:define>
+                    <HBox spacing="8.0">
+                        <ToggleButton fx:id="tbAll" text="Todos" toggleGroup="$discountTypeGroup"
+                                      onAction="#handleDiscountScopeChange"
+                                      selected="true" maxWidth="Infinity" HBox.hgrow="ALWAYS" styleClass="toggle-enum-btn" />
+                        <ToggleButton fx:id="tbCategory" text="Categoría" toggleGroup="$discountTypeGroup"
+                                      onAction="#handleDiscountScopeChange"
+                                      maxWidth="Infinity" HBox.hgrow="ALWAYS" styleClass="toggle-enum-btn" />
+                        <ToggleButton fx:id="tbProduct" text="Producto" toggleGroup="$discountTypeGroup"
+                                      onAction="#handleDiscountScopeChange"
+                                      maxWidth="Infinity" HBox.hgrow="ALWAYS" styleClass="toggle-enum-btn" />
+                    </HBox>
+
+                    <VBox fx:id="boxDiscountTarget" spacing="8.0" visible="false" managed="false">
+                        <Label fx:id="lblDiscountTarget" styleClass="form-label" text="Nombre de la Categoría" />
+                        <TextField fx:id="txtDiscountTarget" promptText="Ej. Bebidas, Postres..." styleClass="custom-text-field" />
+                    </VBox>
+
+                    <Label styleClass="form-label" text="Porcentaje (%)" />
+                    <TextField fx:id="txtDiscountPercentage" promptText="Ej. 50%, (% > 0)" styleClass="custom-text-field" />
+                </VBox>
+                <HBox alignment="CENTER_RIGHT" spacing="12.0">
+                    <Button onAction="#handleCloseDiscountModal" styleClass="btn-secondary" text="Cancelar" />
+                    <Button onAction="#handleAddOrUpdateDiscount" styleClass="btn-primary" text="Guardar mesa" />
+                </HBox>
+            </VBox>
+        </StackPane>
 
         <VBox fx:id="viewInvoices" spacing="20.0" visible="false" managed="false">
             <HBox alignment="CENTER_LEFT" spacing="16.0">

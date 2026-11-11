@@ -4,9 +4,7 @@ import com.devtalles.proyecto.exceptions.InvalidTextException;
 import com.devtalles.proyecto.exceptions.UserAlreadyExistsException;
 import com.devtalles.proyecto.model.RoleUser;
 import com.devtalles.proyecto.model.User;
-import com.devtalles.proyecto.service.CategoryService;
-import com.devtalles.proyecto.service.TableService;
-import com.devtalles.proyecto.service.UserService;
+import com.devtalles.proyecto.service.*;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -39,7 +37,11 @@ public class AuthController {
     @Setter
     private CategoryService categoryService;
     @Setter
+    private ProductService productService;
+    @Setter
     private TableService tableService;
+    @Setter
+    private DiscountService discountService;
 
     @FXML
     public void showRegisterForm() {
@@ -88,7 +90,9 @@ public class AuthController {
                     AdminController adminController = loader.getController();
                     adminController.setUserService(this.userService);
                     adminController.setCategoryService(this.categoryService);
+                    adminController.setProductService(this.productService);
                     adminController.setTableService(this.tableService);
+                    adminController.setDiscountService(this.discountService);
                     adminController.setLoggedUser(user);
 
                     Stage currentStage = (Stage) txtLoginUserName.getScene().getWindow();
@@ -99,6 +103,7 @@ public class AuthController {
                     currentStage.centerOnScreen();
 
                 } catch (IOException e) {
+                    e.printStackTrace();
                     showAlert(Alert.AlertType.ERROR, "Error", "No se pudo cargar la vista de administrador");
                 }
             }
