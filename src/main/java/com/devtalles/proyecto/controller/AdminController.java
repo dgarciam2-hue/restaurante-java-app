@@ -34,62 +34,64 @@ public class AdminController {
     private TableService tableService;
     @Setter
     private DiscountService discountService;
+    @Setter
+    private CustomerService customerService;
 
-    @FXML public Button btnLogout;
+    @FXML private Button btnLogout;
 
     @FXML private Label lblUserName;
     @FXML private Label lblUserInitial;
     @FXML private Label lblUserStatus;
-    @FXML public Label lblDiscountTarget;
+    @FXML private Label lblDiscountTarget;
     @FXML private Label lblCategoryModalTitle;
-    @FXML public Label lblDiscountModalTitle;
-    @FXML public Label lblProductModalTitle;
-    @FXML public Label lblContainerCategory;
-    @FXML public Label lblDescriptionContainerCategory;
+    @FXML private Label lblDiscountModalTitle;
+    @FXML private Label lblProductModalTitle;
+    @FXML private Label lblContainerCategory;
+    @FXML private Label lblDescriptionContainerCategory;
 
     @FXML private VBox viewCategories;
     @FXML private VBox viewTables;
     @FXML private VBox viewDiscounts;
     @FXML private VBox viewInvoices;
-    @FXML public VBox viewProducts;
+    @FXML private VBox viewProducts;
 
     @FXML private TextField txtCategoryName;
-    @FXML public TextField txtTableNumber;
-    @FXML public TextField txtDiscountPercentage;
-    @FXML public TextField txtDiscountId;
-    @FXML public TextField txtDiscountDescription;
-    @FXML public TextField txtDiscountTarget;
-    @FXML public TextField txtProductName;
-    @FXML public TextField txtProductDescription;
-    @FXML public TextField txtProductPrice;
-    @FXML public TextField txtProductId;
-    @FXML public TextField txtProductStock;
-    @FXML public TextField txtCategoryContainerName;
+    @FXML private TextField txtTableNumber;
+    @FXML private TextField txtDiscountPercentage;
+    @FXML private TextField txtDiscountId;
+    @FXML private TextField txtDiscountDescription;
+    @FXML private TextField txtDiscountTarget;
+    @FXML private TextField txtProductName;
+    @FXML private TextField txtProductDescription;
+    @FXML private TextField txtProductPrice;
+    @FXML private TextField txtProductId;
+    @FXML private TextField txtProductStock;
+    @FXML private TextField txtCategoryContainerName;
 
     @FXML private StackPane modalCategoryOverlay;
-    @FXML public StackPane modalTableOverlay;
-    @FXML public StackPane modalDiscountOverlay;
-    @FXML public StackPane modalProductOverlay;
+    @FXML private StackPane modalTableOverlay;
+    @FXML private StackPane modalDiscountOverlay;
+    @FXML private StackPane modalProductOverlay;
 
     @FXML private VBox categoriesContainer;
-    @FXML public VBox productsContainer;
-    @FXML public VBox tablesContainer;
-    @FXML public VBox discountsContainer;
+    @FXML private FlowPane productsContainer;
+    @FXML private VBox tablesContainer;
+    @FXML private FlowPane discountsContainer;
 
     @FXML private ToggleGroup discountTypeGroup;
 
-    @FXML public ToggleButton tbAll;
-    @FXML public ToggleButton tbCategory;
-    @FXML public ToggleButton tbProduct;
-    @FXML public ToggleButton tbMonday;
-    @FXML public ToggleButton tbTuesday;
-    @FXML public ToggleButton tbWednesday;
-    @FXML public ToggleButton tbThursday;
-    @FXML public ToggleButton tbFriday;
-    @FXML public ToggleButton tbSaturday;
-    @FXML public ToggleButton tbSunday;
+    @FXML private ToggleButton tbAll;
+    @FXML private ToggleButton tbCategory;
+    @FXML private ToggleButton tbProduct;
+    @FXML private ToggleButton tbMonday;
+    @FXML private ToggleButton tbTuesday;
+    @FXML private ToggleButton tbWednesday;
+    @FXML private ToggleButton tbThursday;
+    @FXML private ToggleButton tbFriday;
+    @FXML private ToggleButton tbSaturday;
+    @FXML private ToggleButton tbSunday;
 
-    @FXML public VBox boxDiscountTarget;
+    @FXML private VBox boxDiscountTarget;
 
     private Category editingCategory = null;
     private Product editingProduct = null;
@@ -123,6 +125,7 @@ public class AdminController {
             authController.setProductService(this.productService);
             authController.setTableService(this.tableService);
             authController.setDiscountService(this.discountService);
+            authController.setCustomerService(this.customerService);
 
             Stage currentStage = (Stage) lblUserName.getScene().getWindow();
             Scene newScene = new Scene(root);
@@ -769,7 +772,9 @@ public class AdminController {
     private VBox createDiscountCardNode(Discount discount) {
         VBox card = new VBox(16.0);
         card.getStyleClass().add("discount-item-card");
-        card.setMaxWidth(Double.MAX_VALUE);
+        card.setPrefWidth(340.0);
+        card.setMinWidth(340.0);
+        card.setMaxWidth(340.0);
 
         HBox headerBox = createDiscountHeaderBox(discount);
         HBox mainInfoBox = createDiscountMainInfoBox(discount);
@@ -821,18 +826,27 @@ public class AdminController {
 
         Label lblNumber = new Label(String.valueOf(discount.getPercentage()));
         lblNumber.getStyleClass().add("discount-percent-number");
+        lblNumber.setMinWidth(Region.USE_PREF_SIZE);
 
         Label lblSymbol = new Label("%");
         lblSymbol.getStyleClass().add("discount-percent-symbol");
+        lblSymbol.setMinWidth(Region.USE_PREF_SIZE);
 
-        HBox percentContent = new HBox(1.0, lblNumber, lblSymbol);
+        HBox percentContent = new HBox(0.5, lblNumber, lblSymbol);
         percentContent.setAlignment(Pos.BASELINE_CENTER);
+        percentContent.setMinWidth(Region.USE_PREF_SIZE);
+        HBox.setHgrow(percentContent, Priority.NEVER);
 
         StackPane percentBox = new StackPane(percentContent);
         percentBox.getStyleClass().add("discount-percent-box");
 
         Label lblDescription = new Label(discount.getDescription());
         lblDescription.getStyleClass().add("discount-title");
+        lblDescription.setWrapText(true);
+
+        lblDescription.setMinWidth(0);
+        lblDescription.setMaxWidth(Double.MAX_VALUE);
+        HBox.setHgrow(lblDescription, Priority.ALWAYS);
 
         mainBox.getChildren().addAll(percentBox, lblDescription);
         return mainBox;
@@ -944,7 +958,9 @@ public class AdminController {
     private VBox createProductCardNode(Category category, Product product) {
         VBox card = new VBox(14.0);
         card.getStyleClass().add("discount-item-card");
-        card.setMaxWidth(Double.MAX_VALUE);
+        card.setPrefWidth(340.0);
+        card.setMinWidth(340.0);
+        card.setMaxWidth(340.0);
 
         HBox headerBox = createProductHeaderBox(product);
         VBox infoBox = createProductInfoBox(product);

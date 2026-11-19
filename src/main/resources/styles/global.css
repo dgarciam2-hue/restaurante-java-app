@@ -113,6 +113,21 @@
     -fx-font-weight: bold;
 }
 
+.pill-tag-order {
+    -fx-background-color: #1c1f29;
+    -fx-border-color: #262a38;
+    -fx-border-width: 1px;
+    -fx-border-radius: 50px;
+    -fx-background-radius: 50px;
+    -fx-padding: 4px 12px;
+}
+
+.pill-tag-text-order {
+    -fx-text-fill: #ffffff;
+    -fx-font-size: 11.5px;
+    -fx-font-weight: bold;
+}
+
 .auth-card {
     -fx-background-color: #13151b;
     -fx-border-color: #20232d;
@@ -213,8 +228,13 @@
     -fx-underline: true;
 }
 
-.sidebar {
+.sidebar-admin {
     -fx-border-width: 0 1 0 0;
+    -fx-border-color: #525766;
+}
+
+.sidebar-waiter {
+    -fx-border-width: 0 0 1 0;
     -fx-border-color: #525766;
 }
 
@@ -445,6 +465,49 @@
 
 .custom-scroll-pane > .viewport {
     -fx-background-color: #0b0c0f;
+}
+
+.transparent-scroll,
+.transparent-scroll > .viewport {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+
+/* Fondo de la barra de scroll transparente y ancho reducido */
+.transparent-scroll .scroll-bar:vertical {
+    -fx-background-color: transparent;
+    -fx-pref-width: 6px;
+}
+
+/* Carril por donde se mueve la barra */
+.transparent-scroll .scroll-bar:vertical .track {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+
+/* La barrita deslizable (Thumb) */
+.transparent-scroll .scroll-bar:vertical .thumb {
+    -fx-background-color: #262936;
+    -fx-background-radius: 10px;
+    -fx-background-insets: 0;
+}
+
+.transparent-scroll .scroll-bar:vertical .thumb:hover,
+.transparent-scroll .scroll-bar:vertical .thumb:pressed {
+    -fx-background-color: #ff522b; /* Se ilumina en naranja al arrastrarla */
+}
+
+/* Ocultar las flechas de arriba y abajo por completo */
+.transparent-scroll .scroll-bar:vertical .increment-button,
+.transparent-scroll .scroll-bar:vertical .decrement-button {
+    -fx-background-color: transparent;
+    -fx-padding: 0;
+}
+
+.transparent-scroll .scroll-bar:vertical .increment-arrow,
+.transparent-scroll .scroll-bar:vertical .decrement-arrow {
+    -fx-shape: "";
+    -fx-padding: 0;
 }
 
 .btn-action-add {
@@ -712,5 +775,347 @@
 
 .btn-product-available-orange:hover {
     -fx-background-color: #ff6b4a;
+}
+
+.table-select-card {
+    -fx-background-color: #13151b;
+    -fx-border-color: #20232d;
+    -fx-border-radius: 12px;
+    -fx-background-radius: 12px;
+    -fx-padding: 16px 14px;;
+    -fx-text-fill: #ffffff;
+    -fx-font-weight: bold;
+    -fx-font-size: 15px;
+    -fx-cursor: hand;
+}
+
+.table-select-card:hover {
+    -fx-border-color: #383d4e;
+}
+
+.table-select-card:selected {
+    -fx-background-color: rgba(255, 82, 43, 0.10);
+    -fx-border-color: #ff522b;
+    -fx-text-fill: #ffffff;
+}
+
+.zone-combo-box {
+    -fx-background-color: #13151b;
+    -fx-border-color: #262936;
+    -fx-border-width: 1.5px;
+    -fx-border-radius: 12px;
+    -fx-background-radius: 12px;
+    -fx-padding: 6px 12px;
+    -fx-font-size: 15px;
+    -fx-cursor: hand;
+}
+
+.zone-combo-box:hover,
+.zone-combo-box:focused,
+.zone-combo-box:showing {
+    -fx-border-color: #ff522b;
+}
+
+/* Texto seleccionado dentro de la caja ("Norte · $5.000") */
+.zone-combo-box > .list-cell {
+    -fx-text-fill: #ffffff;
+    -fx-font-weight: bold;
+    -fx-background-color: transparent;
+    -fx-padding: 4px 4px;
+}
+
+/* Botón derecho que contiene la flecha */
+.zone-combo-box > .arrow-button {
+    -fx-background-color: transparent;
+    -fx-padding: 0 4px 0 8px;
+}
+
+/* Flecha SVG visible (doble chevron arriba/abajo como en tu imagen) */
+.zone-combo-box > .arrow-button > .arrow {
+    -fx-shape: "M12 5.83L15.17 9l1.41-1.41L12 3 7.41 7.59 8.83 9 12 5.83zm0 12.34L8.83 15l-1.41 1.41L12 21l4.59-4.59L15.17 15 12 18.17z";
+    -fx-background-color: #8e929f; /* Gris claro para que sí se vea bien */
+    -fx-min-width: 12px;
+    -fx-min-height: 16px;
+    -fx-max-width: 12px;
+    -fx-max-height: 16px;
+}
+
+.zone-combo-box:hover > .arrow-button > .arrow,
+.zone-combo-box:showing > .arrow-button > .arrow {
+    -fx-background-color: #ff522b;
+}
+
+/* Lista desplegable al hacer clic */
+.zone-combo-box .combo-box-popup .list-view {
+    -fx-background-color: #181b24;
+    -fx-border-color: #262936;
+    -fx-border-radius: 10px;
+    -fx-background-radius: 10px;
+    -fx-padding: 4px;
+}
+
+.zone-combo-box .combo-box-popup .list-view .list-cell {
+    -fx-background-color: transparent;
+    -fx-text-fill: #d1d5db;
+    -fx-font-size: 14px;
+    -fx-padding: 10px 12px;
+    -fx-background-radius: 6px;
+    -fx-cursor: hand;
+}
+
+.zone-combo-box .combo-box-popup .list-view .list-cell:hover,
+.zone-combo-box .combo-box-popup .list-view .list-cell:selected {
+    -fx-background-color: rgba(255, 82, 43, 0.15);
+    -fx-text-fill: #ffffff;
+    -fx-font-weight: bold;
+}
+
+.cat-filter-card {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-background-radius: 10px;
+    -fx-border-radius: 10px;
+    -fx-padding: 12px 16px;
+    -fx-cursor: hand;
+}
+
+.cat-filter-card:hover {
+    -fx-background-color: rgba(255, 255, 255, 0.04);
+}
+
+.cat-filter-card:selected {
+    -fx-background-color: #1c1f26;
+    -fx-border-color: #262934;
+    -fx-border-width: 1px;
+}
+
+.cat-filter-name {
+    -fx-text-fill: #9ca3af;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+}
+
+.cat-filter-count {
+    -fx-text-fill: #8e929f;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+}
+
+.cat-filter-card:selected .cat-filter-name {
+    -fx-text-fill: #ffffff;
+}
+
+.cat-filter-card:selected .cat-filter-count {
+    -fx-text-fill: #ff522b;
+}
+
+.categories-section-header {
+    -fx-text-fill: #6b7280;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-padding: 0 0 6px 16px;
+}
+
+.category-subtitle {
+    -fx-text-fill: #6b7280;
+    -fx-font-size: 11.5px;
+    -fx-font-weight: normal;
+}
+
+.order-product-card {
+    -fx-background-color: #13151b;
+    -fx-border-color: #20232d;
+    -fx-border-width: 1.2px;
+    -fx-background-radius: 12px;
+    -fx-border-radius: 12px;
+    -fx-padding: 12px 14px;
+}
+
+.order-product-card-selected {
+    -fx-background-color: #1d1615;
+    -fx-border-color: #ff522b;
+}
+
+.in-order-badge {
+    -fx-background-color: #112a1d;
+    -fx-text-fill: #6ee798;
+    -fx-font-size: 10.5px;
+    -fx-font-weight: bold;
+    -fx-padding: 3px 8px;
+    -fx-background-radius: 20px;
+}
+
+.order-product-title {
+    -fx-text-fill: #ffffff;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+}
+
+.order-product-desc {
+    -fx-text-fill: #8e929f;
+    -fx-font-size: 12px;
+}
+
+.order-product-price {
+    -fx-text-fill: #ffffff;
+    -fx-font-size: 15.5px;
+    -fx-font-weight: bold;
+}
+
+.btn-add-product {
+    -fx-background-color: #1a1517;
+    -fx-border-color: #ff522b;
+    -fx-border-width: 1px;
+    -fx-text-fill: #ff522b;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-background-radius: 18px;
+    -fx-border-radius: 18px;
+    -fx-padding: 5px 12px;
+    -fx-cursor: hand;
+}
+
+.btn-add-product:hover {
+    -fx-background-color: rgba(255, 82, 43, 0.15);
+}
+
+.btn-add-product:disabled {
+    -fx-background-color: #20232d;
+    -fx-border-color: #2e3240;
+    -fx-text-fill: #8e929f;
+    -fx-opacity: 0.7;
+    -fx-cursor: default;
+}
+
+.order-card-dynamic {
+    -fx-background-color: #13151b;
+    -fx-border-color: #20232d;
+    -fx-border-width: 1.2px;
+    -fx-background-radius: 12px;
+    -fx-border-radius: 12px;
+}
+
+.empty-order-icon-box {
+    -fx-background-color: #1c1e26;
+    -fx-border-color: #252834;
+    -fx-border-width: 1px;
+    -fx-background-radius: 14px;
+    -fx-border-radius: 14px;
+}
+
+.empty-order-bag-icon {
+    -fx-shape: "M 7 7 V 6 A 3 3 0 0 1 13 6 V 7 H 16 L 17.5 19 H 2.5 L 4 7 Z M 9 7 H 11 V 6 A 1 1 0 0 0 9 6 Z M 5.8 9 L 4.7 17 H 15.3 L 14.2 9 Z";
+    -fx-background-color: #ff7a59;
+    -fx-min-width: 20px;
+    -fx-min-height: 20px;
+    -fx-max-width: 20px;
+    -fx-max-height: 20px;
+}
+
+.empty-order-title {
+    -fx-text-fill: #ffffff;
+    -fx-font-size: 14.5px;
+    -fx-font-weight: bold;
+    -fx-padding: 4px 0 0 0;
+}
+
+.empty-order-subtitle {
+    -fx-text-fill: #8e929f;
+    -fx-font-size: 12.5px;
+    -fx-line-spacing: 2px;
+}
+
+.btn-order-cancel {
+    -fx-background-color: #121318;
+    -fx-border-color: #252834;
+    -fx-border-width: 1.2px;
+    -fx-background-radius: 12px;
+    -fx-border-radius: 12px;
+    -fx-text-fill: #ffffff;
+    -fx-font-size: 13.5px;
+    -fx-font-weight: bold;
+    -fx-padding: 12px 16px;
+    -fx-cursor: hand;
+}
+
+.btn-order-cancel:hover {
+    -fx-background-color: #1c1e26;
+    -fx-border-color: #323646;
+}
+
+.btn-order-save {
+    -fx-background-color: #ff522b;
+    -fx-border-color: transparent;
+    -fx-background-radius: 12px;
+    -fx-border-radius: 12px;
+    -fx-text-fill: #121318;
+    -fx-font-size: 13.5px;
+    -fx-font-weight: bold;
+    -fx-padding: 12px 16px;
+    -fx-cursor: hand;
+}
+
+.btn-order-save:hover {
+    -fx-background-color: #ff6847;
+}
+
+.btn-order-save:disabled {
+    -fx-background-color: #7c3222;
+    -fx-text-fill: #121318;
+    -fx-opacity: 1.0;
+    -fx-cursor: default;
+}
+
+.order-summary-card {
+    -fx-padding: 8 0;
+    -fx-border-color: transparent transparent #2a2a2a transparent;
+}
+
+.order-summary-title {
+    -fx-text-fill: white;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+}
+
+.order-summary-unit-price {
+    -fx-text-fill: #8a8a8a;
+    -fx-font-size: 11px;
+}
+
+.qty-box {
+    -fx-background-color: #121212;
+    -fx-border-color: #333333;
+    -fx-border-radius: 10;
+    -fx-background-radius: 10;
+    -fx-padding: 4 6;
+}
+
+.btn-qty {
+    -fx-background-color: transparent;
+    -fx-text-fill: white;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-padding: 0 3;
+    -fx-cursor: hand;
+}
+
+.order-summary-qty {
+    -fx-text-fill: white;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+}
+
+.order-summary-subtotal {
+    -fx-text-fill: white;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+}
+
+.btn-delete-item {
+    -fx-background-color: transparent;
+    -fx-text-fill: #ff6b6b;
+    -fx-font-size: 14px;
+    -fx-cursor: hand;
+    -fx-padding: 0;
 }
 

@@ -30,5 +30,8 @@ public abstract class Order {
         this.orderStatus = orderStatus;
     }
 
+    public Order() {
+    }
+
     public abstract double calculateAdditionalValue();
 }

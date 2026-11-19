@@ -1,0 +1,229 @@
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.HBox?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.control.Button?>
+
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.FlowPane?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.shape.Circle?>
+<VBox prefHeight="700.0" prefWidth="1050.0" spacing="25.0" styleClass="root"
+      xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.devtalles.proyecto.controller.WaiterController">
+
+    <HBox prefHeight="80.0" styleClass="sidebar-waiter" spacing="10.0">
+        <padding>
+            <Insets left="24.0" top="16.0" bottom="16.0" right="24.0"/>
+        </padding>
+
+        <HBox alignment="CENTER_LEFT" spacing="12.0">
+            <padding>
+                <Insets top="10.0" bottom="10.0"/>
+            </padding>
+            <StackPane styleClass="logo-restaurant">
+                <StackPane styleClass="icon-restaurant"/>
+            </StackPane>
+            <Label style="-fx-font-weight: bold; -fx-font-size: 20px; -fx-text-fill: #ffffff;" text="Sazón" />
+        </HBox>
+
+        <Region HBox.hgrow="ALWAYS"/>
+
+        <Button maxHeight="Infinity" onAction="#handleUser" styleClass="user-card-btn">
+            <graphic>
+                <HBox alignment="CENTER_LEFT" spacing="12.0">
+                    <StackPane styleClass="user-avatar">
+                        <Label fx:id="lblUserInitial" styleClass="avatar-text" text="?" />
+                    </StackPane>
+
+                    <VBox alignment="CENTER_LEFT" spacing="2.0">
+                        <Label fx:id="lblUserName" styleClass="user-name" text="Cargando..." />
+                        <Label fx:id="lblUserStatus" styleClass="user-status" text="Cargando..." />
+                    </VBox>
+                </HBox>
+            </graphic>
+        </Button>
+
+        <Button fx:id="btnLogout" maxHeight="Infinity" onAction="#handleLogout" styleClass="sidebar-btn" text="Cerrar sesión"
+                managed="false" visible="false">
+            <graphic>
+                <StackPane styleClass="icon-svg, icon-logout"/>
+            </graphic>
+        </Button>
+    </HBox>
+
+    <StackPane fx:id="viewSectionOrders" VBox.vgrow="ALWAYS">
+        <padding>
+            <Insets right="80.0" bottom="40.0" left="80.0"/>
+        </padding>
+
+        <VBox spacing="20.0">
+            <HBox alignment="CENTER_LEFT" spacing="16.0">
+                <VBox spacing="4.0" HBox.hgrow="ALWAYS">
+                    <Label text="Pedidos" styleClass="header-title"/>
+                    <Label text="Toma y sigue los pedidos del servicio." styleClass="header-subtitle" />
+                </VBox>
+
+                <Button onAction="#handleOpenNewOrderModal" text="+  Nuevo pedido" styleClass="create-object" />
+            </HBox>
+
+            <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS" styleClass="custom-scroll-pane">
+                <VBox fx:id="ordersContainer" spacing="12.0"/>
+            </ScrollPane>
+        </VBox>
+
+        <StackPane fx:id="modalTypeOrderOverlay" managed="false" visible="false" styleClass="modal-overlay">
+            <VBox maxWidth="400.0" spacing="18.0" styleClass="modal-card">
+                <HBox alignment="CENTER_LEFT">
+                    <VBox spacing="5.0">
+                        <Label fx:id="lblOrderModalTitle" styleClass="modal-title" text="Nuevo pedido" />
+                        <Label text="Elige a qué está relacionado el pedido." styleClass="header-subtitle" />
+                    </VBox>
+                    <Region HBox.hgrow="ALWAYS" />
+                    <Button onAction="#handleCloseOrderModal" styleClass="btn-icon-close" text="✕" />
+                </HBox>
+
+                <HBox styleClass="tab-container">
+                    <Button fx:id="btnTable" maxWidth="Infinity" onAction="#showOrderTableForm" styleClass="tab-button-active" text="En mesa" HBox.hgrow="ALWAYS" />
+                    <Button fx:id="btnDelivery" maxWidth="Infinity" onAction="#showOrderDeliveryForm" styleClass="tab-button-inactive" text="A domicilio" HBox.hgrow="ALWAYS" />
+                </HBox>
+
+                <StackPane fx:id="viewTableForm">
+                    <VBox spacing="8.0">
+                        <Label styleClass="form-label" text="Mesas disponibles" />
+
+                        <ScrollPane fitToWidth="true" hbarPolicy="NEVER" fitToHeight="true"
+                                    styleClass="transparent-scroll">
+                            <content>
+                                <FlowPane fx:id="availableTablesContainer" hgap="10.0" vgap="10.0">
+                                    <padding>
+                                        <Insets bottom="4.0" right="4.0" top="2.0" />
+                                    </padding>
+                                </FlowPane>
+                            </content>
+                        </ScrollPane>
+                    </VBox>
+                </StackPane>
+
+                <StackPane fx:id="viewDeliveryForm" managed="false" visible="false">
+                    <ScrollPane fitToWidth="true" fitToHeight="true" hbarPolicy="NEVER" styleClass="transparent-scroll">
+                        <VBox spacing="8.0">
+                            <Label styleClass="form-label" text="Teléfono del cliente" />
+                            <TextField fx:id="txtCustomerPhone" promptText="Ej. 3001234567 ..." styleClass="custom-text-field" />
+                            <Label fx:id="lblPhoneFeedback" managed="false" visible="false" text="Cliente no encontrado: LLenar información"/>
+                            <Label fx:id="lblCustomerName" managed="false" visible="false" styleClass="form-label" text="Nombre del cliente"/>
+                            <TextField fx:id="txtCustomerName" managed="false" visible="false" promptText="Ej. Diego García" styleClass="custom-text-field" />
+                            <Label fx:id="lblCustomerAddress" managed="false" visible="false" styleClass="form-label" text="Dirección del cliente"/>
+                            <TextField fx:id="txtCustomerAddress" managed="false" visible="false" promptText="Ej. Calle 10 # 5-20, Bocagrande" styleClass="custom-text-field" />
+                            <Label styleClass="form-label" text="Dirección de la entrega" />
+                            <TextField fx:id="txtDeliveryAddress" promptText="Ej. Calle 10 # 5-20, Bocagrande" styleClass="custom-text-field" />
+                            <Label styleClass="form-label" text="Zona de entrega"/>
+                            <ComboBox fx:id="cmbDeliveryZone" maxWidth="Infinity" promptText="Selecciona una zona..."
+                            styleClass="zone-combo-box"/>
+                        </VBox>
+                    </ScrollPane>
+                </StackPane>
+
+                <Region VBox.vgrow="ALWAYS"/>
+                <HBox alignment="CENTER_RIGHT" spacing="12.0">
+                    <Button onAction="#handleCloseOrderModal" styleClass="btn-secondary" text="Cancelar" />
+                    <Button onAction="#handleCreateAndAddProducts" styleClass="btn-primary" text="Crear y agregar productos" />
+                </HBox>
+            </VBox>
+        </StackPane>
+    </StackPane>
+
+    <StackPane fx:id="viewSectionAvailableProducts" managed="false" visible="false">
+        <padding>
+            <Insets right="40.0" bottom="40.0" left="40.0"/>
+        </padding>
+
+        <VBox spacing="20.0">
+            <HBox alignment="CENTER_LEFT" spacing="16.0">
+                <VBox spacing="4.0" HBox.hgrow="ALWAYS">
+                    <Label text="Agregar productos" styleClass="header-title"/>
+                    <Label fx:id="lblOrderId" text="Cargando..." styleClass="header-subtitle" />
+                </VBox>
+
+                <Button onAction="#handleCloseAvailableProducts" text="Volver a pedidos" styleClass="create-object" />
+            </HBox>
+
+            <HBox spacing="10.0">
+                <VBox spacing="10.0">
+                    <Label text="CATEGORÍAS" styleClass="categories-section-header"/>
+                    <ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="transparent-scroll">
+                        <VBox fx:id="orderCategoriesContainer" spacing="6.0"/>
+                    </ScrollPane>
+                </VBox>
+
+                <ScrollPane fitToWidth="true" hbarPolicy="NEVER" prefWidth="470.0"
+                            maxWidth="470.0" styleClass="transparent-scroll" VBox.vgrow="ALWAYS">
+                        <FlowPane fx:id="availableProductsInCategory" hgap="10.0" vgap="10.0"
+                                  prefWrapLength="450.0" maxWidth="450.0">
+                            <padding>
+                                <Insets bottom="20.0" right="10.0" top="4.0" />
+                            </padding>
+                        </FlowPane>
+                </ScrollPane>
+
+                <VBox spacing="20.0" styleClass="order-card-dynamic" HBox.hgrow="ALWAYS">
+                    <padding>
+                        <Insets top="20.0" right="20.0" bottom="20.0" left="20.0"/>
+                    </padding>
+                    <HBox alignment="CENTER_LEFT">
+                        <VBox>
+                            <Label fx:id="lblOrderDynamicId" text="Cargando..." styleClass="header-title"/>
+                            <Label fx:id="quantityProducts" text="Sin productos" styleClass="header-subtitle"/>
+                        </VBox>
+
+                        <Region HBox.hgrow="ALWAYS"/>
+
+                        <HBox alignment="CENTER" maxHeight="-Infinity" maxWidth="-Infinity"
+                              spacing="6.0" styleClass="pill-tag-order">
+                            <Circle fill="#60a5fa" radius="3.5" />
+                            <Label styleClass="pill-tag-text-order" text="En creación" />
+                        </HBox>
+                    </HBox>
+
+                    <VBox fx:id="emptyOrderStateBox" alignment="TOP_CENTER" spacing="12.0" VBox.vgrow="ALWAYS">
+                        <StackPane maxHeight="-Infinity" maxWidth="-Infinity"
+                                   minHeight="54.0" minWidth="54.0" prefHeight="54.0" prefWidth="54.0"
+                                   styleClass="empty-order-icon-box">
+                            <Region styleClass="empty-order-bag-icon" />
+                        </StackPane>
+
+                        <Label styleClass="empty-order-title" text="Aún no hay productos" />
+                        <Label maxWidth="230.0" styleClass="empty-order-subtitle"
+                               text="Toca «Agregar» en un producto para añadirlo al pedido."
+                               textAlignment="CENTER" wrapText="true" />
+                    </VBox>
+
+                    <ScrollPane fx:id="spaceForAddedProducts" fitToWidth="true" hbarPolicy="NEVER"
+                                styleClass="transparent-scroll" managed="false" visible="false" fitToHeight="true" VBox.vgrow="ALWAYS">
+                        <VBox fx:id="containerForAddedProducts" />
+                    </ScrollPane>
+
+                    <Region VBox.vgrow="ALWAYS"/>
+
+                    <HBox alignment="CENTER" spacing="12.0">
+                        <Button fx:id="btnCancelOrder" maxWidth="Infinity" prefWidth="0.0" styleClass="btn-order-cancel"
+                                text="Cancelar" HBox.hgrow="ALWAYS" />
+
+                        <Button fx:id="btnSaveOrder" disable="true" styleClass="btn-order-save"
+                                text="Guardar pedido" HBox.hgrow="ALWAYS" minWidth="-Infinity"/>
+                    </HBox>
+                </VBox>
+
+            </HBox>
+        </VBox>
+
+
+
+
+    </StackPane>
+
+</VBox>

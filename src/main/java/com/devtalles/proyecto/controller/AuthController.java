@@ -42,6 +42,8 @@ public class AuthController {
     private TableService tableService;
     @Setter
     private DiscountService discountService;
+    @Setter
+    private CustomerService customerService;
 
     @FXML
     public void showRegisterForm() {
@@ -93,6 +95,7 @@ public class AuthController {
                     adminController.setProductService(this.productService);
                     adminController.setTableService(this.tableService);
                     adminController.setDiscountService(this.discountService);
+                    adminController.setCustomerService(this.customerService);
                     adminController.setLoggedUser(user);
 
                     Stage currentStage = (Stage) txtLoginUserName.getScene().getWindow();
@@ -103,12 +106,32 @@ public class AuthController {
                     currentStage.centerOnScreen();
 
                 } catch (IOException e) {
-                    e.printStackTrace();
                     showAlert(Alert.AlertType.ERROR, "Error", "No se pudo cargar la vista de administrador");
                 }
             }
             else {
-                //Se dirige a vista mesero
+                try {
+                    FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/WaiterView.fxml"));
+                    Parent root = loader.load();
+
+                    WaiterController waiterController = loader.getController();
+                    waiterController.setUserService(this.userService);
+                    waiterController.setLoggedUser(user);
+                    waiterController.setCategoryService(this.categoryService);
+                    waiterController.setProductService(this.productService);
+                    waiterController.setTableService(this.tableService);
+                    waiterController.setDiscountService(this.discountService);
+                    waiterController.setCustomerService(this.customerService);
+
+                    Stage currentStage = (Stage) txtLoginUserName.getScene().getWindow();
+                    Scene newScene = new Scene(root);
+                    newScene.getStylesheets().add(getClass().getResource("/styles/global.css").toExternalForm());
+                    currentStage.setTitle("Sazón - Panel de Meseros");
+                    currentStage.setScene(newScene);
+                    currentStage.centerOnScreen();
+                } catch (IOException e) {
+                    showAlert(Alert.AlertType.ERROR, "Error", "No se pudo cargar la vista de mesero");
+                }
             }
         }
         else {

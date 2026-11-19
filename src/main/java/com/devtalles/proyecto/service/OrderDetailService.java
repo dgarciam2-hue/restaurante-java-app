@@ -26,21 +26,7 @@ public class OrderDetailService implements OrderDetailRepository {
         Validates.validateObject(product, "Debe agregar un producto obligatoriamente.");
         OrderDetailValidator.validate(product, amount);
 
-        if (!product.isAvailabilityProduct()) {
-            throw new InvalidOrderDetailException("El producto '" + product.getNameProduct() + "' no se encuentra disponible actualmente.");
-        }
-
-        Optional<OrderDetail> existingDetail = order.getDetails()
-                .stream()
-                .filter(o -> o.getProduct().getIdProduct() == product.getIdProduct())
-                .findFirst();
-
-        if (existingDetail.isPresent()) {
-            OrderDetail detail = existingDetail.get();
-            detail.setAmount(detail.getAmount() + amount);
-        } else {
-            order.getDetails().add(new OrderDetail(product, amount));
-        }
+        order.getDetails().add(new OrderDetail(product, amount));
 
         restaurantRepositoryService.saveChanges();
     }

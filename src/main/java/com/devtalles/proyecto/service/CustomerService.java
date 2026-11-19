@@ -8,6 +8,8 @@ import com.devtalles.proyecto.model.Customer;
 import com.devtalles.proyecto.repository.RestaurantRepositoryService;
 import com.devtalles.proyecto.utils.Validates;
 
+import java.util.Optional;
+
 public class CustomerService implements CustomerRepository {
     private final RestaurantRepositoryService restaurantRepositoryService;
 
@@ -38,15 +40,10 @@ public class CustomerService implements CustomerRepository {
     }
 
     @Override
-    public Customer getCustomer(String customerPhone) throws InvalidTextException, CustomerNotFoundException {
-        Validates.validateText(customerPhone, "El cliente debe tener un teléfono de contacto");
-
-        String formattedPhone = customerPhone.trim();
-
+    public Optional<Customer> findByPhone(String customerPhone) {
         return restaurantRepositoryService.getCustomers()
                 .stream()
-                .filter(c -> c.getCustomerPhone().equalsIgnoreCase(formattedPhone))
-                .findFirst()
-                .orElseThrow( () -> new CustomerNotFoundException("El cliente con teléfono '" + formattedPhone + "' no existe en el sistema"));
+                .filter(c -> c.getCustomerPhone().equalsIgnoreCase(customerPhone))
+                .findFirst();
     }
 }

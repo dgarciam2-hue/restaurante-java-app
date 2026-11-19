@@ -25,6 +25,7 @@ public class MainApp extends Application {
         ProductService productService = new ProductService(restaurantRepositoryService);
         TableService tableService = new TableService(restaurantRepositoryService);
         DiscountService discountService = new DiscountService(restaurantRepositoryService);
+        CustomerService customerService = new CustomerService(restaurantRepositoryService);
 
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/AuthView.fxml"));
         Parent root = loader.load();
@@ -35,6 +36,7 @@ public class MainApp extends Application {
         authController.setProductService(productService);
         authController.setTableService(tableService);
         authController.setDiscountService(discountService);
+        authController.setCustomerService(customerService);
 
         Scene scene = new Scene(root);
         primaryStage.setTitle("Sazón - Sistema de Gestión de Restaurante");
