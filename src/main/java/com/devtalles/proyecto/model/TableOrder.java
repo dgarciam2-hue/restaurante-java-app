@@ -12,11 +12,10 @@ import java.util.List;
 public class TableOrder extends Order{
     private Table table;
 
-    public TableOrder(int orderId, LocalDateTime date, List<OrderDetail> details, OrderStatus orderStatus, Table table) throws InvalidObjectException, InvalidOrderException {
-        super(orderId,date,details,orderStatus);
+    public TableOrder(int orderId, LocalDateTime date, OrderStatus orderStatus, Table table) throws InvalidObjectException, InvalidOrderException {
+        super(orderId,date,orderStatus);
 
         Validates.validateObject(table, "El pedido debe tener una mesa asociada");
-
         this.table = table;
     }
 

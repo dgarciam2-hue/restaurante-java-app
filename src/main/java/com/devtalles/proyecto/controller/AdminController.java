@@ -3,6 +3,8 @@ package com.devtalles.proyecto.controller;
 import com.devtalles.proyecto.exceptions.*;
 import com.devtalles.proyecto.model.*;
 import com.devtalles.proyecto.service.*;
+import com.devtalles.proyecto.utils.RestaurantAlert;
+import com.devtalles.proyecto.utils.ReusableCards;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Pos;
@@ -36,6 +38,10 @@ public class AdminController {
     private DiscountService discountService;
     @Setter
     private CustomerService customerService;
+    @Setter
+    private OrderDetailService orderDetailService;
+    @Setter
+    private OrderService orderService;
 
     @FXML private Button btnLogout;
 
@@ -54,6 +60,7 @@ public class AdminController {
     @FXML private VBox viewDiscounts;
     @FXML private VBox viewInvoices;
     @FXML private VBox viewProducts;
+    @FXML private VBox viewOrders;
 
     @FXML private TextField txtCategoryName;
     @FXML private TextField txtTableNumber;
@@ -77,6 +84,7 @@ public class AdminController {
     @FXML private FlowPane productsContainer;
     @FXML private VBox tablesContainer;
     @FXML private FlowPane discountsContainer;
+    @FXML private FlowPane ordersContainer;
 
     @FXML private ToggleGroup discountTypeGroup;
 
@@ -126,17 +134,15 @@ public class AdminController {
             authController.setTableService(this.tableService);
             authController.setDiscountService(this.discountService);
             authController.setCustomerService(this.customerService);
+            authController.setOrderDetailService(this.orderDetailService);
+            authController.setOrderService(this.orderService);
 
             Stage currentStage = (Stage) lblUserName.getScene().getWindow();
-            Scene newScene = new Scene(root);
-            newScene.getStylesheets().add(getClass().getResource("/styles/global.css").toExternalForm());
-
+            currentStage.getScene().setRoot(root);
             currentStage.setTitle("Sazón - Sistema de Gestión de Restaurante");
-            currentStage.setScene(newScene);
-            currentStage.centerOnScreen();
 
         } catch (IOException e) {
-            showAlert(Alert.AlertType.ERROR, "Error", "No se pudo volver a la pantalla de inicio de sesión.");
+            RestaurantAlert.showError(lblUserName.getScene().getWindow(), "Error", "No se pudo cerrar sesión correctamente.", "Aceptar");
         }
     }
 
@@ -178,19 +184,20 @@ public class AdminController {
         try {
             if(editingCategory == null) {
                 Category newCategory = categoryService.addCategory(categoryName);
-                showAlert(Alert.AlertType.INFORMATION, "Registro Exitoso",
-                        "Categoría registrada: " + newCategory.getCategoryName());
+                RestaurantAlert.showSuccess(lblCategoryModalTitle.getScene().getWindow(), "Registro Exitoso",
+                        "Categoría registrada correctamente: " + newCategory.getCategoryName(), "Aceptar");
             }
             else {
                 categoryService.updateCategory(editingCategory.getCategoryName(), categoryName);
-                showAlert(Alert.AlertType.INFORMATION, "Éxito", "Categoría actualizada correctamente.");
+                RestaurantAlert.showSuccess(lblCategoryModalTitle.getScene().getWindow(), "Actualización Exitosa",
+                        "Categoría actualizada correctamente: " + categoryName, "Aceptar");
             }
 
             renderCategories();
             handleCloseCategoryModal();
 
         } catch (InvalidTextException | InvalidCategoryException | CategoryNotFoundException e) {
-            showAlert(Alert.AlertType.WARNING, "Error en registro", e.getMessage());
+            RestaurantAlert.showError(lblCategoryModalTitle.getScene().getWindow(), "Error en registro", e.getMessage(), "Aceptar");
         }
     }
 
@@ -204,10 +211,10 @@ public class AdminController {
             if (response == ButtonType.OK) {
                 try {
                     categoryService.deleteCategoryName(category.getCategoryName());
-                    showAlert(Alert.AlertType.INFORMATION, "Éxito", "Categoría eliminada.");
+                    RestaurantAlert.showSuccess(lblCategoryModalTitle.getScene().getWindow(), "Eliminación Exitosa", "Categoría eliminada correctamente.", "Aceptar");
                     renderCategories();
                 } catch (Exception e) {
-                    showAlert(Alert.AlertType.ERROR, "Error", e.getMessage());
+                    RestaurantAlert.showError(lblCategoryModalTitle.getScene().getWindow(), "Error", e.getMessage(), "Aceptar");
                 }
             }
         });
@@ -288,7 +295,8 @@ public class AdminController {
         String idProduct = txtProductId.getText().trim();
         String stockProduct = txtProductStock.getText().trim();
         if(priceProduct.isEmpty() || idProduct.isEmpty() || stockProduct.isEmpty()) {
-            showAlert(Alert.AlertType.WARNING, "Campos incompletos", "Por favor completa todos los campos.");
+            RestaurantAlert.showError(lblProductModalTitle.getScene().getWindow(), "Campos incompletos", "Por favor completa todos los campos.", "Aceptar");
+            return;
         }
 
         try {
@@ -299,12 +307,13 @@ public class AdminController {
 
             if(editingProduct == null) {
                 productService.addProduct(categoryName, product);
-                showAlert(Alert.AlertType.INFORMATION, "Registro Exitoso",
-                        "Id del producto registrado: " + id);
+                RestaurantAlert.showSuccess(lblProductModalTitle.getScene().getWindow(), "Registro Exitoso",
+                        "Id del producto registrado: " + id, "Aceptar");
             }
             else {
                 productService.updateProduct(id, product);
-                showAlert(Alert.AlertType.INFORMATION, "Éxito", "Producto actualizado correctamente.");
+                RestaurantAlert.showSuccess(lblProductModalTitle.getScene().getWindow(), "Actualización Exitosa",
+                        "Producto actualizado correctamente.", "Aceptar");
             }
 
             Category containerCategory = categoryService.getCategoryByName(categoryName);
@@ -314,7 +323,7 @@ public class AdminController {
 
         } catch(CategoryNotFoundException | InvalidProductException | InvalidObjectException | InvalidTextException
                 | ProductNotFoundException e) {
-            showAlert(Alert.AlertType.WARNING, "Error en registro", e.getMessage());
+            RestaurantAlert.showError(lblProductModalTitle.getScene().getWindow(), "Error en registro", e.getMessage(), "Aceptar");
         }
 
     }
@@ -330,14 +339,14 @@ public class AdminController {
             if (response == ButtonType.OK) {
                 try {
                     productService.deleteProduct(product.getIdProduct());
-                    showAlert(Alert.AlertType.INFORMATION, "Éxito", "Categoría eliminada.");
+                    RestaurantAlert.showSuccess(lblProductModalTitle.getScene().getWindow(), "Eliminación Exitosa", "Producto eliminado correctamente.", "Aceptar");
 
                     Category containerCategory = categoryService.getCategoryByName(nameCategory);
                     handleShowCategoryProducts(containerCategory);
                     renderProducts(containerCategory);
 
                 } catch (Exception e) {
-                    showAlert(Alert.AlertType.ERROR, "Error", e.getMessage());
+                    RestaurantAlert.showError(lblProductModalTitle.getScene().getWindow(), "Error", e.getMessage(), "Aceptar");
                 }
             }
         });
@@ -357,7 +366,7 @@ public class AdminController {
             renderProducts(category);
 
         } catch(ProductNotFoundException | InvalidProductException e) {
-            showAlert(Alert.AlertType.WARNING, "Error en cambio de estado", e.getMessage());
+            RestaurantAlert.showError(lblProductModalTitle.getScene().getWindow(), "Error en cambio de estado", e.getMessage(), "Aceptar");
         }
     }
 
@@ -386,20 +395,21 @@ public class AdminController {
         String numberTable = txtTableNumber.getText().trim();
 
         if(numberTable.isEmpty()) {
-            showAlert(Alert.AlertType.WARNING, "Campos incompletos", "Por favor completa todos los campos.");
+            RestaurantAlert.showError(lblProductModalTitle.getScene().getWindow(), "Campos incompletos", "Por favor completa todos los campos.", "Aceptar");
+            return;
         }
 
         try {
             int number = Integer.parseInt(numberTable);
             tableService.addTable(number);
-            showAlert(Alert.AlertType.INFORMATION, "Registro Exitoso",
-                    "Número de mesa registrada: " + number);
+            RestaurantAlert.showSuccess(lblProductModalTitle.getScene().getWindow(), "Registro Exitoso",
+                    "Número de mesa registrada: " + number, "Aceptar");
 
             renderTables();
             handleCloseTableModal();
 
         } catch (InvalidTableException e) {
-            showAlert(Alert.AlertType.WARNING, "Error en registro", e.getMessage());
+            RestaurantAlert.showError(lblProductModalTitle.getScene().getWindow(), "Error en registro", e.getMessage(), "Aceptar");
         }
     }
 
@@ -413,10 +423,10 @@ public class AdminController {
             if (response == ButtonType.OK) {
                 try {
                     tableService.deleteTable(table.getNumberTable());
-                    showAlert(Alert.AlertType.INFORMATION, "Éxito", "Mesa eliminada.");
+                    RestaurantAlert.showSuccess(lblProductModalTitle.getScene().getWindow(), "Eliminación Exitosa", "Mesa eliminada correctamente.", "Aceptar");
                     renderTables();
                 } catch (Exception e) {
-                    showAlert(Alert.AlertType.ERROR, "Error", e.getMessage());
+                    RestaurantAlert.showError(lblProductModalTitle.getScene().getWindow(), "Error", e.getMessage(), "Aceptar");
                 }
             }
         });
@@ -510,7 +520,8 @@ public class AdminController {
     public void handleAddOrUpdateDiscount() {
         String idDiscount = txtDiscountId.getText().trim();
         if(idDiscount.isEmpty()) {
-            showAlert(Alert.AlertType.WARNING, "Campos incompletos", "Por favor completa todos los campos.");
+            RestaurantAlert.showError(lblProductModalTitle.getScene().getWindow(), "Campos incompletos", "Por favor completa todos los campos.", "Aceptar");
+            return;
         }
         String description = txtDiscountDescription.getText();
         DayOfWeek dayOfWeek = tbMonday.isSelected() ? DayOfWeek.MONDAY
@@ -532,8 +543,8 @@ public class AdminController {
             double percentage = Double.parseDouble(percentageDiscount);
             if(editingDiscount == null) {
                 discountService.addDiscount(id, description, dayOfWeek, percentage, scope, targetName, true);
-                showAlert(Alert.AlertType.INFORMATION, "Registro Exitoso",
-                        "ID de descuento registrado: " + id);
+                RestaurantAlert.showSuccess(lblProductModalTitle.getScene().getWindow(), "Registro Exitoso",
+                        "ID de descuento registrado: " + id, "Aceptar");
             }
             else {
                 Discount discount = new Discount(id,description,dayOfWeek,percentage,scope,targetName,true);
@@ -544,7 +555,7 @@ public class AdminController {
             handleCloseDiscountModal();
         } catch (InvalidDiscountException | InvalidTextException | InvalidObjectException |
                 CategoryNotFoundException | ProductNotFoundException | DiscountNotFoundException e) {
-            showAlert(Alert.AlertType.WARNING, "Error en registro", e.getMessage());
+            RestaurantAlert.showError(lblProductModalTitle.getScene().getWindow(), "Error en registro", e.getMessage(), "Aceptar");
         }
     }
 
@@ -559,7 +570,7 @@ public class AdminController {
 
             renderDiscounts();
         }catch (InvalidDiscountException | DiscountNotFoundException e) {
-            showAlert(Alert.AlertType.WARNING, "Error en cambio de estado", e.getMessage());
+            RestaurantAlert.showError(lblProductModalTitle.getScene().getWindow(), "Error en cambio de estado", e.getMessage(), "Aceptar");
         }
     }
 
@@ -573,10 +584,10 @@ public class AdminController {
             if (response == ButtonType.OK) {
                 try {
                     discountService.deleteDiscount(discount.getIdDiscount());
-                    showAlert(Alert.AlertType.INFORMATION, "Éxito", "Descuento eliminado.");
+                    RestaurantAlert.showSuccess(lblProductModalTitle.getScene().getWindow(), "Eliminación Exitosa", "Descuento eliminado correctamente.", "Aceptar");
                     renderDiscounts();
                 } catch (Exception e) {
-                    showAlert(Alert.AlertType.ERROR, "Error", e.getMessage());
+                    RestaurantAlert.showError(lblProductModalTitle.getScene().getWindow(), "Error", e.getMessage(), "Aceptar");
                 }
             }
         });
@@ -593,6 +604,7 @@ public class AdminController {
         hideView(viewDiscounts);
         hideView(viewInvoices);
         hideView(viewProducts);
+        hideView(viewOrders);
 
         targetView.setVisible(true);
         targetView.setManaged(true);
@@ -601,14 +613,6 @@ public class AdminController {
     private void hideView(VBox view) {
         view.setVisible(false);
         view.setManaged(false);
-    }
-
-    private void showAlert(Alert.AlertType type, String title, String content) {
-        Alert alert = new Alert(type);
-        alert.setTitle(title);
-        alert.setHeaderText(null);
-        alert.setContentText(content);
-        alert.showAndWait();
     }
 
     private HBox createCategoryCardNode(Category category) {
@@ -1102,4 +1106,27 @@ public class AdminController {
         actionsContainer.getChildren().addAll(btnToggleAvailability, bottomRow);
         return actionsContainer;
     }
+
+    @FXML
+    public void handleOrders() {
+        showSection(viewOrders);
+        renderOrders();
+    }
+
+    public void renderOrders() {
+        ordersContainer.getChildren().clear();
+
+        List<Order> orders = orderService.getOrders();
+
+        for(Order order: orders) {
+            try {
+                VBox cardNode = ReusableCards.createAdminOrderCardNode(order, userService.getUserByIdOrder(order.getOrderId()), orderService);
+                ordersContainer.getChildren().add(cardNode);
+            } catch (UserNotFoundException e) {
+                RestaurantAlert.showError(lblProductModalTitle.getScene().getWindow(), "Error al renderizar orden", e.getMessage(), "Aceptar");
+            }
+        }
+    }
+
+
 }

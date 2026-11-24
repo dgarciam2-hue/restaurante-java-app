@@ -103,6 +103,10 @@ public class ProductService implements ProductRepository {
         }
 
         Product product = getProductById(idProduct);
+
+        if(product.getStockProduct() <= 0) {
+            throw new InvalidProductException("No se puede marcar como disponible un producto con stock cero.");
+        }
         product.setAvailabilityProduct(true);
         restaurantRepositoryService.saveChanges();
     }
@@ -134,6 +138,27 @@ public class ProductService implements ProductRepository {
         restaurantRepositoryService.saveChanges();
     }
 
+    @Override
+    public void updateProductStock(int idProduct, int newStock) throws ProductNotFoundException, InvalidProductException {
+        if (idProduct <= 0) {
+            throw new InvalidProductException("El ID del producto debe ser mayor a cero.");
+        }
+        if (newStock < 0) {
+            throw new InvalidProductException("El stock del producto no puede ser negativo.");
+        }
+
+        if(newStock == 0) {
+            NoAvailableProduct(idProduct);
+        } else {
+            availableProduct(idProduct);
+        }
+
+        Product product = getProductById(idProduct);
+        product.setStockProduct(newStock);
+        restaurantRepositoryService.saveChanges();
+    }
+
+    @Override
     public Product getProductById(int idProduct) throws ProductNotFoundException {
         return restaurantRepositoryService.getCategories()
                 .stream()

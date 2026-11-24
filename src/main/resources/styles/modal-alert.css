@@ -1,0 +1,70 @@
+.sazon-modal-card {
+    -fx-background-color: #16171a;
+    -fx-background-radius: 16px;
+    -fx-border-color: rgba(255, 255, 255, 0.08);
+    -fx-border-width: 1px;
+    -fx-border-radius: 16px;
+    -fx-padding: 28px 24px 24px 24px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.65), 24, 0.2, 0, 10);
+}
+
+.sazon-modal-title {
+    -fx-text-fill: #f9fafb;
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+    -fx-text-alignment: center;
+}
+
+.sazon-modal-message {
+    -fx-text-fill: #9ca3af;
+    -fx-font-size: 13.5px;
+    -fx-text-alignment: center;
+    -fx-wrap-text: true;
+}
+
+.sazon-modal-btn {
+    -fx-background-color: #f45d22;
+    -fx-text-fill: #111111;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-background-radius: 10px;
+    -fx-padding: 11px 18px;
+    -fx-cursor: hand;
+    -fx-max-width: infinity;
+}
+
+.sazon-modal-btn:hover {
+    -fx-background-color: #ff6e36;
+}
+
+.sazon-alert-valid .sazon-modal-icon-circle {
+    -fx-background-color: rgba(34, 197, 94, 0.14);
+    -fx-background-radius: 999px;
+    -fx-min-width: 56px;
+    -fx-min-height: 56px;
+    -fx-max-width: 56px;
+    -fx-max-height: 56px;
+    -fx-alignment: center;
+}
+
+.sazon-alert-valid .sazon-modal-icon-symbol {
+    -fx-text-fill: #22c55e;
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+}
+
+.sazon-alert-invalid .sazon-modal-icon-circle {
+    -fx-background-color: rgba(239, 68, 68, 0.16);
+    -fx-background-radius: 999px;
+    -fx-min-width: 56px;
+    -fx-min-height: 56px;
+    -fx-max-width: 56px;
+    -fx-max-height: 56px;
+    -fx-alignment: center;
+}
+
+.sazon-alert-invalid .sazon-modal-icon-symbol {
+    -fx-text-fill: #ef4444;
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+}

@@ -71,6 +71,22 @@ public class TableService implements TableRepository {
     }
 
     @Override
+    public void updateTableStatus(Table table, TableStatus newStatus) throws InvalidTableException, TableNotFoundException {
+        if (table == null) {
+            throw new InvalidTableException("La mesa no puede ser nula");
+        }
+
+        Table existingTable = restaurantRepositoryService.getTables()
+                .stream()
+                .filter(t -> t.getNumberTable() == table.getNumberTable())
+                .findFirst()
+                .orElseThrow(() -> new TableNotFoundException("La mesa " + table.getNumberTable() + " no existe"));
+
+        existingTable.setTableStatus(newStatus);
+        restaurantRepositoryService.saveChanges();
+    }
+
+    @Override
     public List<Table> getTables() {
         return restaurantRepositoryService.getTables();
     }

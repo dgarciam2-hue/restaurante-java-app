@@ -17,8 +17,8 @@ public class DeliveryOrder extends Order{
     private String deliveryAddress;
     private int deliveryZone;
 
-    public DeliveryOrder(int orderId, LocalDateTime date, List<OrderDetail> details, OrderStatus orderStatus, String deliveryAddress, Customer customer, int deliveryZone) throws InvalidObjectException, InvalidTextException, InvalidOrderException {
-        super(orderId,date,details,orderStatus);
+    public DeliveryOrder(int orderId, LocalDateTime date, OrderStatus orderStatus, String deliveryAddress, Customer customer, int deliveryZone) throws InvalidObjectException, InvalidTextException, InvalidOrderException {
+        super(orderId,date,orderStatus);
 
         Validates.validateObject(customer, "El cliente es obligatorio para un pedido a domicilio");
         Validates.validateText(deliveryAddress, "La dirección de entrega no puede estar vacía");
@@ -26,6 +26,10 @@ public class DeliveryOrder extends Order{
         this.deliveryAddress = deliveryAddress.trim();
         this.customer = customer;
         this.deliveryZone = deliveryZone;
+    }
+
+    public DeliveryOrder() {
+        super();
     }
 
     @Override

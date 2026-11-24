@@ -2,12 +2,15 @@ package com.devtalles.proyecto.service;
 
 import com.devtalles.proyecto.exceptions.InvalidTextException;
 import com.devtalles.proyecto.exceptions.UserAlreadyExistsException;
+import com.devtalles.proyecto.exceptions.UserNotFoundException;
 import com.devtalles.proyecto.interfaces.UserRepository;
+import com.devtalles.proyecto.model.Order;
 import com.devtalles.proyecto.model.RoleUser;
 import com.devtalles.proyecto.model.User;
 import com.devtalles.proyecto.repository.RestaurantRepositoryService;
 import com.devtalles.proyecto.utils.Validates;
 
+import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 
@@ -77,5 +80,35 @@ public class UserService implements UserRepository {
                 .filter(u -> u.getEmail().equalsIgnoreCase(email)
                 && u.getUserName().equalsIgnoreCase(userName))
                 .findFirst();
+    }
+
+    @Override
+    public List<Order> getOrdersByWaiterId(int waiterId) throws UserNotFoundException {
+        User waiter = restaurantRepositoryService.getUsers()
+                .stream()
+                .filter(u -> u.getId() == waiterId && u.getRoleUser() == RoleUser.MESERO)
+                .findFirst()
+                .orElseThrow(() -> new UserNotFoundException("No se encontró un mesero con el ID especificado."));
+
+        return waiter.getOrders();
+    }
+
+    public User getUserById(int userId) throws UserNotFoundException {
+        return restaurantRepositoryService.getUsers()
+                .stream()
+                .filter(u -> u.getId() == userId)
+                .findFirst()
+                .orElseThrow(() -> new UserNotFoundException("No se encontró un usuario con el ID especificado."));
+    }
+
+    public User getUserByIdOrder(int orderId) throws UserNotFoundException {
+        return restaurantRepositoryService.getUsers().stream()
+                .filter(user -> user.getRoleUser() == RoleUser.MESERO)
+                .filter(user -> user.getOrders() != null)
+                .filter(user -> user.getOrders().stream()
+                        .anyMatch(order -> order != null && order.getOrderId() == orderId))
+                    .findFirst()
+                    .orElseThrow(() -> new UserNotFoundException(
+                            "No se encontró un mesero asociado con el pedido " + orderId));
     }
 }

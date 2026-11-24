@@ -5,6 +5,7 @@ import com.devtalles.proyecto.exceptions.UserAlreadyExistsException;
 import com.devtalles.proyecto.model.RoleUser;
 import com.devtalles.proyecto.model.User;
 import com.devtalles.proyecto.service.*;
+import com.devtalles.proyecto.utils.RestaurantAlert;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -44,6 +45,10 @@ public class AuthController {
     private DiscountService discountService;
     @Setter
     private CustomerService customerService;
+    @Setter
+    private OrderDetailService orderDetailService;
+    @Setter
+    private OrderService orderService;
 
     @FXML
     public void showRegisterForm() {
@@ -96,17 +101,16 @@ public class AuthController {
                     adminController.setTableService(this.tableService);
                     adminController.setDiscountService(this.discountService);
                     adminController.setCustomerService(this.customerService);
+                    adminController.setOrderDetailService(this.orderDetailService);
+                    adminController.setOrderService(this.orderService);
                     adminController.setLoggedUser(user);
 
                     Stage currentStage = (Stage) txtLoginUserName.getScene().getWindow();
-                    Scene newScene = new Scene(root);
-                    newScene.getStylesheets().add(getClass().getResource("/styles/global.css").toExternalForm());
+                    currentStage.getScene().setRoot(root);
                     currentStage.setTitle("Sazón - Panel de Administración");
-                    currentStage.setScene(newScene);
-                    currentStage.centerOnScreen();
 
                 } catch (IOException e) {
-                    showAlert(Alert.AlertType.ERROR, "Error", "No se pudo cargar la vista de administrador");
+                    RestaurantAlert.showError(txtLoginUserName.getScene().getWindow(), "Error", "No se pudo cargar la vista de administrador", "Aceptar");
                 }
             }
             else {
@@ -116,27 +120,26 @@ public class AuthController {
 
                     WaiterController waiterController = loader.getController();
                     waiterController.setUserService(this.userService);
-                    waiterController.setLoggedUser(user);
                     waiterController.setCategoryService(this.categoryService);
                     waiterController.setProductService(this.productService);
                     waiterController.setTableService(this.tableService);
                     waiterController.setDiscountService(this.discountService);
                     waiterController.setCustomerService(this.customerService);
+                    waiterController.setOrderDetailService(this.orderDetailService);
+                    waiterController.setOrderService(this.orderService);
+                    waiterController.setLoggedUser(user);
 
                     Stage currentStage = (Stage) txtLoginUserName.getScene().getWindow();
-                    Scene newScene = new Scene(root);
-                    newScene.getStylesheets().add(getClass().getResource("/styles/global.css").toExternalForm());
+                    currentStage.getScene().setRoot(root);
                     currentStage.setTitle("Sazón - Panel de Meseros");
-                    currentStage.setScene(newScene);
-                    currentStage.centerOnScreen();
                 } catch (IOException e) {
-                    showAlert(Alert.AlertType.ERROR, "Error", "No se pudo cargar la vista de mesero");
+                    RestaurantAlert.showError(txtLoginUserName.getScene().getWindow(), "Error", "No se pudo cargar la vista de mesero", "Aceptar");
                 }
             }
         }
         else {
-            showAlert(Alert.AlertType.ERROR, "Error de Inicio de sesión",
-                    "Credenciales incorrectas o usuario no registrado");
+            RestaurantAlert.showError(txtLoginUserName.getScene().getWindow(), "Error de Inicio de sesión",
+                    "Credenciales incorrectas o usuario no registrado", "Aceptar");
         }
     }
 
@@ -147,24 +150,16 @@ public class AuthController {
 
         try {
             User newUser = userService.registerUser(userName, email);
-            showAlert(Alert.AlertType.INFORMATION, "Registro Exitoso",
-                    "Usuario registrado como " + newUser.getRoleUser() +
-                            ". Ahora puedes iniciar sesión.");
+            RestaurantAlert.showSuccess(txtLoginUserName.getScene().getWindow(), "¡Cuenta creada con éxito!",
+                    "Ya puedes iniciar sesión con tu usuario " + newUser.getUserName() +
+                            " y tu correo " + newUser.getEmail() + ".", "Aceptar");
 
             showLoginForm();
             txtLoginUserName.setText(userName);
             txtLoginEmail.setText(email);
 
         } catch (InvalidTextException | UserAlreadyExistsException | IllegalArgumentException e) {
-            showAlert(Alert.AlertType.WARNING, "Error en registro", e.getMessage());
+            RestaurantAlert.showError(txtLoginUserName.getScene().getWindow(), "Error de Registro", e.getMessage(), "Aceptar");
         }
-    }
-
-    private void showAlert(Alert.AlertType type, String title, String content) {
-        Alert alert = new Alert(type);
-        alert.setTitle(title);
-        alert.setHeaderText(null);
-        alert.setContentText(content);
-        alert.showAndWait();
     }
 }

@@ -26,6 +26,8 @@ public class MainApp extends Application {
         TableService tableService = new TableService(restaurantRepositoryService);
         DiscountService discountService = new DiscountService(restaurantRepositoryService);
         CustomerService customerService = new CustomerService(restaurantRepositoryService);
+        OrderDetailService orderDetailService = new OrderDetailService(restaurantRepositoryService);
+        OrderService orderService = new OrderService(restaurantRepositoryService);
 
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/AuthView.fxml"));
         Parent root = loader.load();
@@ -37,12 +39,17 @@ public class MainApp extends Application {
         authController.setTableService(tableService);
         authController.setDiscountService(discountService);
         authController.setCustomerService(customerService);
+        authController.setOrderDetailService(orderDetailService);
+        authController.setOrderService(orderService);
 
         Scene scene = new Scene(root);
+        scene.getStylesheets().add(getClass().getResource("/styles/global.css").toExternalForm());
         primaryStage.setTitle("Sazón - Sistema de Gestión de Restaurante");
         primaryStage.setScene(scene);
-        scene.getStylesheets().add(getClass().getResource("/styles/global.css").toExternalForm());
-        primaryStage.setResizable(false);
+        primaryStage.setResizable(true);
+        primaryStage.setMinWidth(960);
+        primaryStage.setMinHeight(640);
+        primaryStage.setMaximized(true);
         primaryStage.show();
     }
 }

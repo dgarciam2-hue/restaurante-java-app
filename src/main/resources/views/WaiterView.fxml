@@ -12,7 +12,9 @@
 <?import javafx.scene.layout.FlowPane?>
 <?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.shape.Circle?>
-<VBox prefHeight="700.0" prefWidth="1050.0" spacing="25.0" styleClass="root"
+<?import javafx.scene.control.ToggleButton?>
+<?import javafx.scene.control.ToggleGroup?>
+<VBox prefHeight="700.0" prefWidth="1050.0" maxWidth="Infinity" maxHeight="Infinity" spacing="25.0" styleClass="root"
       xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="com.devtalles.proyecto.controller.WaiterController">
 
@@ -57,11 +59,10 @@
     </HBox>
 
     <StackPane fx:id="viewSectionOrders" VBox.vgrow="ALWAYS">
-        <padding>
-            <Insets right="80.0" bottom="40.0" left="80.0"/>
-        </padding>
-
         <VBox spacing="20.0">
+            <padding>
+                <Insets right="80.0" bottom="40.0" left="80.0"/>
+            </padding>
             <HBox alignment="CENTER_LEFT" spacing="16.0">
                 <VBox spacing="4.0" HBox.hgrow="ALWAYS">
                     <Label text="Pedidos" styleClass="header-title"/>
@@ -71,20 +72,19 @@
                 <Button onAction="#handleOpenNewOrderModal" text="+  Nuevo pedido" styleClass="create-object" />
             </HBox>
 
-            <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS" styleClass="custom-scroll-pane">
-                <VBox fx:id="ordersContainer" spacing="12.0"/>
+            <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS" styleClass="transparent-scroll">
+                <FlowPane fx:id="ordersContainer" hgap="10.0" vgap="10.0"/>
             </ScrollPane>
         </VBox>
 
         <StackPane fx:id="modalTypeOrderOverlay" managed="false" visible="false" styleClass="modal-overlay">
-            <VBox maxWidth="400.0" spacing="18.0" styleClass="modal-card">
+            <VBox maxWidth="440.0" maxHeight="-Infinity" spacing="18.0" styleClass="modal-card">
                 <HBox alignment="CENTER_LEFT">
-                    <VBox spacing="5.0">
+                    <VBox spacing="5.0" HBox.hgrow="ALWAYS">
                         <Label fx:id="lblOrderModalTitle" styleClass="modal-title" text="Nuevo pedido" />
                         <Label text="Elige a qué está relacionado el pedido." styleClass="header-subtitle" />
                     </VBox>
-                    <Region HBox.hgrow="ALWAYS" />
-                    <Button onAction="#handleCloseOrderModal" styleClass="btn-icon-close" text="✕" />
+                    <Button onAction="#handleCloseOrderModal" styleClass="btn-icon-close" text="✕" minWidth="-Infinity" minHeight="-Infinity" />
                 </HBox>
 
                 <HBox styleClass="tab-container">
@@ -96,7 +96,7 @@
                     <VBox spacing="8.0">
                         <Label styleClass="form-label" text="Mesas disponibles" />
 
-                        <ScrollPane fitToWidth="true" hbarPolicy="NEVER" fitToHeight="true"
+                        <ScrollPane fitToWidth="true" hbarPolicy="NEVER" maxHeight="340.0"
                                     styleClass="transparent-scroll">
                             <content>
                                 <FlowPane fx:id="availableTablesContainer" hgap="10.0" vgap="10.0">
@@ -110,7 +110,7 @@
                 </StackPane>
 
                 <StackPane fx:id="viewDeliveryForm" managed="false" visible="false">
-                    <ScrollPane fitToWidth="true" fitToHeight="true" hbarPolicy="NEVER" styleClass="transparent-scroll">
+                    <ScrollPane fitToWidth="true" hbarPolicy="NEVER" maxHeight="420.0" styleClass="transparent-scroll">
                         <VBox spacing="8.0">
                             <Label styleClass="form-label" text="Teléfono del cliente" />
                             <TextField fx:id="txtCustomerPhone" promptText="Ej. 3001234567 ..." styleClass="custom-text-field" />
@@ -128,16 +128,162 @@
                     </ScrollPane>
                 </StackPane>
 
-                <Region VBox.vgrow="ALWAYS"/>
                 <HBox alignment="CENTER_RIGHT" spacing="12.0">
                     <Button onAction="#handleCloseOrderModal" styleClass="btn-secondary" text="Cancelar" />
                     <Button onAction="#handleCreateAndAddProducts" styleClass="btn-primary" text="Crear y agregar productos" />
                 </HBox>
             </VBox>
         </StackPane>
+
+        <StackPane fx:id="modalUpdateOrder" managed="false" visible="false" styleClass="modal-overlay">
+            <VBox prefWidth="500.0" maxWidth="540.0" maxHeight="-Infinity" spacing="14.0" styleClass="modal-card">
+                <!-- Encabezado -->
+                <HBox spacing="12.0">
+                    <VBox spacing="4.0" alignment="CENTER_LEFT" HBox.hgrow="ALWAYS">
+                        <Label fx:id="lblIdOrderUpdate" text="Actualizar pedido..." styleClass="header-title"/>
+                        <Label fx:id="lblOrderUpdateDescription" text="Cargando..." styleClass="header-subtitle" wrapText="true" maxWidth="Infinity"/>
+                    </VBox>
+                    <Button onAction="#handleCloseUpdateOrderModal" styleClass="btn-icon-close" text="✕" minWidth="-Infinity" minHeight="-Infinity" />
+                </HBox>
+
+                <!-- Sección 1: productos del pedido -->
+                <VBox spacing="4.0" VBox.vgrow="SOMETIMES">
+                    <Label text="PRODUCTOS DEL PEDIDO" styleClass="form-label"/>
+                    <ScrollPane fitToWidth="true" hbarPolicy="NEVER" minHeight="115.0" prefHeight="180.0" maxHeight="280.0"
+                                VBox.vgrow="SOMETIMES" styleClass="transparent-scroll">
+                        <VBox fx:id="containerForProductsInOrder" spacing="4.0"/>
+                    </ScrollPane>
+                </VBox>
+
+                <Region styleClass="update-order-divider"/>
+
+                <!-- Sección 2: agregar producto -->
+                <VBox spacing="8.0">
+                    <Label text="AGREGAR PRODUCTO" styleClass="form-label"/>
+                    <ComboBox fx:id="cmbUpdateOrderCategory" maxWidth="Infinity" promptText="Selecciona una categoría..."
+                              styleClass="zone-combo-box"/>
+                    <ComboBox fx:id="cmbUpdateOrderProduct" maxWidth="Infinity" promptText="No hay productos disponibles..."
+                              styleClass="zone-combo-box"/>
+
+                    <HBox alignment="CENTER_LEFT" spacing="12.0">
+                        <HBox alignment="CENTER" spacing="12.0" styleClass="qty-box">
+                            <Button onAction="#handleUpdateOrderQtyMinus" styleClass="btn-qty" text="−"/>
+                            <Label fx:id="lblUpdateOrderQty" styleClass="order-summary-qty" text="1"/>
+                            <Button onAction="#handleUpdateOrderQtyPlus" styleClass="btn-qty" text="+"/>
+                        </HBox>
+                        <Button onAction="#handleAddProductToUpdateOrder" styleClass="btn-order-update" text="+  Agregar"/>
+                    </HBox>
+
+                    <Label text="Si el producto ya está en el pedido, cambia su cantidad arriba."
+                           styleClass="update-order-hint" wrapText="true"/>
+                </VBox>
+
+                <!-- Pie: subtotal y acciones -->
+                <HBox alignment="CENTER_LEFT" styleClass="update-order-total-row">
+                    <Label text="Subtotal" styleClass="update-order-total-label"/>
+                    <Region HBox.hgrow="ALWAYS"/>
+                    <Label fx:id="lblUpdateOrderSubtotal" text="\$0" styleClass="update-order-total-value"/>
+                </HBox>
+
+                <HBox alignment="CENTER_RIGHT" spacing="12.0">
+                    <Button onAction="#handleCloseUpdateOrderModal" styleClass="btn-secondary" text="Cancelar" />
+                    <Button fx:id="btnSaveUpdateOrder" styleClass="btn-primary" text="Guardar cambios" />
+                </HBox>
+            </VBox>
+        </StackPane>
+
+        <StackPane fx:id="modalInvoiceOrder" managed="false" visible="false" styleClass="modal-overlay">
+            <VBox prefWidth="500.0" maxWidth="540.0" maxHeight="-Infinity" spacing="14.0" styleClass="modal-card">
+                <VBox spacing="4.0" alignment="CENTER_LEFT" HBox.hgrow="ALWAYS">
+                    <Label fx:id="lblIdOrderInvoice" text="Facturar pedido..." styleClass="header-title"/>
+                    <Label fx:id="lblOrderInvoiceDescription" text="Cargando..." styleClass="header-subtitle" wrapText="true" maxWidth="Infinity"/>
+                </VBox>
+
+                <VBox spacing="10.0" alignment="CENTER_LEFT" HBox.hgrow="ALWAYS">
+                    <HBox>
+                        <Label text="Subtotal" styleClass="order-summary-title"/>
+                        <Region HBox.hgrow="ALWAYS"/>
+                        <Label fx:id="lblSubtotalInvoice" text="Cargando..." styleClass="order-summary-title"/>
+                    </HBox>
+
+                    <Region styleClass="update-order-divider"/>
+
+                    <HBox>
+                        <Label text="Descuento" styleClass="order-invoice-title"/>
+                        <Region HBox.hgrow="ALWAYS"/>
+                        <Label fx:id="lblDiscountInvoice" text="Cargando..." styleClass="order-invoice-title"/>
+                    </HBox>
+
+                    <Region styleClass="update-order-divider"/>
+
+                    <HBox>
+                        <Label text="Impuesto al consumo (8%)" styleClass="order-invoice-title"/>
+                        <Region HBox.hgrow="ALWAYS"/>
+                        <Label fx:id="lblTaxInvoice" text="Cargando..." styleClass="order-summary-title"/>
+                    </HBox>
+
+                    <Region styleClass="update-order-divider"/>
+
+                    <VBox spacing="8.0">
+                        <Label text="Propina" styleClass="order-summary-title"/>
+                        <fx:define>
+                            <ToggleGroup fx:id="tipTypeGroup" />
+                        </fx:define>
+                        <VBox spacing="8.0">
+                            <ToggleButton fx:id="tbSuggested" toggleGroup="$tipTypeGroup" selected="true"
+                            maxWidth="Infinity" HBox.hgrow="ALWAYS" styleClass="toggle-tip-card">
+                                <HBox spacing="12.0">
+                                    <StackPane styleClass="order-circle-tip"/>
+                                    <VBox spacing="6.0" maxWidth="Infinity" HBox.hgrow="ALWAYS">
+                                        <Label text="Sugerida (10%)" styleClass="order-tip-title"/>
+                                        <Label fx:id="valueTipSuggested" text="Cargando..." styleClass="order-tip-text"/>
+                                    </VBox>
+                                </HBox>
+                            </ToggleButton>
+
+                            <ToggleButton fx:id="tbPersonalized" toggleGroup="$tipTypeGroup" selected="true"
+                                          maxWidth="Infinity" HBox.hgrow="ALWAYS" styleClass="toggle-tip-card">
+                                <HBox spacing="12.0">
+                                    <StackPane styleClass="order-circle-tip"/>
+                                    <VBox spacing="6.0" maxWidth="Infinity" HBox.hgrow="ALWAYS">
+                                        <Label text="Valor personalizado" styleClass="order-tip-title"/>
+                                        <Label text="El cliente indica cuánto quiere dejar" styleClass="order-tip-text"/>
+                                    </VBox>
+                                </HBox>
+                            </ToggleButton>
+
+                            <TextField fx:id="txtPersonalizedTip" promptText="6%" styleClass="custom-text-field"
+                            managed="false" visible="false"/>
+
+                            <ToggleButton fx:id="tbNothing" toggleGroup="$tipTypeGroup" selected="true"
+                                          maxWidth="Infinity" HBox.hgrow="ALWAYS" styleClass="toggle-tip-card">
+                                <HBox spacing="12.0">
+                                    <StackPane styleClass="order-circle-tip"/>
+                                    <VBox spacing="6.0" maxWidth="Infinity" HBox.hgrow="ALWAYS">
+                                        <Label text="Sin propina" styleClass="order-tip-title"/>
+                                        <Label text="No se agrega ningún valor" styleClass="order-tip-text"/>
+                                    </VBox>
+                                </HBox>
+                            </ToggleButton>
+
+                            <Region styleClass="update-order-divider"/>
+
+                            <HBox>
+                                <Label text="Total a pagar"/>
+                                <Region HBox.hgrow="ALWAYS"/>
+                                <Label text="Cargando..."/>
+                            </HBox>
+
+
+                        </VBox>
+                    </VBox>
+
+                </VBox>
+            </VBox>
+        </StackPane>
     </StackPane>
 
-    <StackPane fx:id="viewSectionAvailableProducts" managed="false" visible="false">
+    <StackPane fx:id="viewSectionAvailableProducts" managed="false" visible="false" VBox.vgrow="ALWAYS">
         <padding>
             <Insets right="40.0" bottom="40.0" left="40.0"/>
         </padding>
@@ -152,25 +298,24 @@
                 <Button onAction="#handleCloseAvailableProducts" text="Volver a pedidos" styleClass="create-object" />
             </HBox>
 
-            <HBox spacing="10.0">
-                <VBox spacing="10.0">
+            <HBox spacing="16.0" VBox.vgrow="ALWAYS">
+                <VBox spacing="10.0" minWidth="180.0" prefWidth="210.0" maxWidth="240.0">
                     <Label text="CATEGORÍAS" styleClass="categories-section-header"/>
-                    <ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="transparent-scroll">
+                    <ScrollPane fitToWidth="true" hbarPolicy="NEVER" VBox.vgrow="ALWAYS" styleClass="transparent-scroll">
                         <VBox fx:id="orderCategoriesContainer" spacing="6.0"/>
                     </ScrollPane>
                 </VBox>
 
-                <ScrollPane fitToWidth="true" hbarPolicy="NEVER" prefWidth="470.0"
-                            maxWidth="470.0" styleClass="transparent-scroll" VBox.vgrow="ALWAYS">
-                        <FlowPane fx:id="availableProductsInCategory" hgap="10.0" vgap="10.0"
-                                  prefWrapLength="450.0" maxWidth="450.0">
+                <ScrollPane fitToWidth="true" hbarPolicy="NEVER" maxWidth="Infinity" maxHeight="Infinity"
+                            styleClass="transparent-scroll" HBox.hgrow="ALWAYS">
+                        <FlowPane fx:id="availableProductsInCategory" hgap="10.0" vgap="10.0">
                             <padding>
                                 <Insets bottom="20.0" right="10.0" top="4.0" />
                             </padding>
                         </FlowPane>
                 </ScrollPane>
 
-                <VBox spacing="20.0" styleClass="order-card-dynamic" HBox.hgrow="ALWAYS">
+                <VBox spacing="20.0" styleClass="order-card-dynamic" minWidth="340.0" prefWidth="380.0" maxWidth="420.0">
                     <padding>
                         <Insets top="20.0" right="20.0" bottom="20.0" left="20.0"/>
                     </padding>
@@ -210,10 +355,10 @@
                     <Region VBox.vgrow="ALWAYS"/>
 
                     <HBox alignment="CENTER" spacing="12.0">
-                        <Button fx:id="btnCancelOrder" maxWidth="Infinity" prefWidth="0.0" styleClass="btn-order-cancel"
+                        <Button onAction="#handleCloseAvailableProducts" fx:id="btnCancelOrder" maxWidth="Infinity" prefWidth="0.0" styleClass="btn-order-cancel"
                                 text="Cancelar" HBox.hgrow="ALWAYS" />
 
-                        <Button fx:id="btnSaveOrder" disable="true" styleClass="btn-order-save"
+                        <Button fx:id="btnSaveOrder" onAction="#handleSaveOrUpdateOrder" disable="true" styleClass="btn-order-save"
                                 text="Guardar pedido" HBox.hgrow="ALWAYS" minWidth="-Infinity"/>
                     </HBox>
                 </VBox>

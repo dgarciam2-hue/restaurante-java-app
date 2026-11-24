@@ -9,5 +9,6 @@ public interface ProductRepository {
     public void availableProduct(int idProduct) throws ProductNotFoundException, InvalidProductException;
     public void NoAvailableProduct(int idProduct) throws ProductNotFoundException, InvalidProductException;
     public void deleteProduct(int idProduct) throws ProductNotFoundException, InvalidProductException;
+    public void updateProductStock(int idProduct, int newStock) throws ProductNotFoundException, InvalidProductException;
     public Product getProductById(int idProduct) throws ProductNotFoundException;
 }

@@ -1,9 +1,10 @@
 package com.devtalles.proyecto.controller;
 
-import com.devtalles.proyecto.exceptions.InvalidCustomerException;
-import com.devtalles.proyecto.exceptions.InvalidTextException;
+import com.devtalles.proyecto.exceptions.*;
 import com.devtalles.proyecto.model.*;
 import com.devtalles.proyecto.service.*;
+import com.devtalles.proyecto.utils.RestaurantAlert;
+import com.devtalles.proyecto.utils.ReusableCards;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Pos;
@@ -15,6 +16,9 @@ import javafx.stage.Stage;
 import lombok.Setter;
 
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 public class WaiterController {
@@ -24,6 +28,18 @@ public class WaiterController {
     @Setter private TableService tableService;
     @Setter private DiscountService discountService;
     @Setter private CustomerService customerService;
+    @Setter private OrderDetailService orderDetailService;
+    private OrderService orderService;
+
+    public void setOrderService(OrderService orderService) {
+        this.orderService = orderService;
+        List<Order> orders = orderService.getOrders();
+
+        this.defaultOrderId = (orders == null ? 0 : orders.stream()
+                .mapToInt(Order::getOrderId)
+                .max()
+                .orElse(0)) + 1;
+    }
 
     @FXML private Label lblUserInitial;
     @FXML private Label lblUserName;
@@ -35,8 +51,11 @@ public class WaiterController {
     @FXML private Label lblOrderId;
     @FXML private Label lblOrderDynamicId;
     @FXML private Label quantityProducts;
+    @FXML private Label lblUpdateOrderQty;
 
     @FXML private ComboBox<Integer> cmbDeliveryZone;
+    @FXML private ComboBox<Category> cmbUpdateOrderCategory;
+    @FXML private ComboBox<Product> cmbUpdateOrderProduct;
 
     @FXML private TextField txtCustomerPhone;
     @FXML private TextField txtCustomerName;
@@ -47,9 +66,11 @@ public class WaiterController {
     @FXML private Button btnTable;
     @FXML private Button btnDelivery;
     @FXML private Button btnSaveOrder;
+    @FXML private Button btnSaveUpdateOrder;
 
     @FXML private FlowPane availableTablesContainer;
     @FXML private FlowPane availableProductsInCategory;
+    @FXML private FlowPane ordersContainer;
 
     @FXML private VBox orderCategoriesContainer;
     @FXML private VBox emptyOrderStateBox;
@@ -63,13 +84,24 @@ public class WaiterController {
 
     @FXML private ScrollPane spaceForAddedProducts;
 
+    // viewUpdateOrder
+    @FXML private StackPane modalUpdateOrder;
+    @FXML private Label lblIdOrderUpdate;
+    @FXML private Label lblOrderUpdateDescription;
+    @FXML private Label lblUpdateOrderSubtotal;
+    @FXML private VBox containerForProductsInOrder;
+
+    // Copia de trabajo de los detalles del pedido en edición (no toca el pedido real hasta guardar).
+    private final List<OrderDetail> updateOrderDetails = new ArrayList<>();
+
     private Order editingOrder = null;
 
     private Table selectedTable = null;
     private Customer selectedCustomer = null;
     private String deliveryAddress = null;
     private int selectedZone = 1;
-    private int defaultOrderId = 1;
+    int defaultOrderId = 1;
+    int idUserLogged = 0;
 
     private final ToggleGroup tableSelectionGroup = new ToggleGroup();
     private final ToggleGroup categoryFilterGroup = new ToggleGroup();
@@ -79,6 +111,7 @@ public class WaiterController {
     public void setLoggedUser(User user) {
         if(user != null && user.getUserName() != null) {
             lblUserName.setText(user.getUserName());
+            idUserLogged = user.getId();
             String initial = user.getUserName().substring(0,1).toUpperCase();
             lblUserInitial.setText(initial);
             String status = user.getRoleUser().name();
@@ -86,6 +119,11 @@ public class WaiterController {
         }
         setupPhoneRealtimeSearch();
         setupDeliveryZoneComboBox();
+        renderWaiterOrders();
+        setupCategoryComboBox();
+        if (btnSaveUpdateOrder != null) {
+            btnSaveUpdateOrder.setOnAction(e -> handleSaveOrUpdateOrder());
+        }
     }
 
     @FXML
@@ -107,17 +145,15 @@ public class WaiterController {
             authController.setTableService(this.tableService);
             authController.setDiscountService(this.discountService);
             authController.setCustomerService(this.customerService);
+            authController.setOrderDetailService(this.orderDetailService);
+            authController.setOrderService(this.orderService);
 
             Stage currentStage = (Stage) lblUserName.getScene().getWindow();
-            Scene newScene = new Scene(root);
-            newScene.getStylesheets().add(getClass().getResource("/styles/global.css").toExternalForm());
-
+            currentStage.getScene().setRoot(root);
             currentStage.setTitle("Sazón - Sistema de Gestión de Restaurante");
-            currentStage.setScene(newScene);
-            currentStage.centerOnScreen();
 
         } catch (IOException e) {
-            showAlert(Alert.AlertType.ERROR, "Error", "No se pudo volver a la pantalla de inicio de sesión.");
+            RestaurantAlert.showError(lblUserName.getScene().getWindow(), "Error", "No se pudo volver a la pantalla de inicio de sesión.", "Aceptar");
         }
     }
 
@@ -127,7 +163,25 @@ public class WaiterController {
         if(lblOrderModalTitle != null) lblOrderModalTitle.setText("Nuevo pedido");
         modalTypeOrderOverlay.setManaged(true);
         modalTypeOrderOverlay.setVisible(true);
+        showOrderTableForm();
         renderAvailableTables();
+    }
+
+    /** Callback del botón "Actualizar" de las tarjetas de pedido (ReusableCards). */
+    private void handleUpdateOrder(Order order) {
+        if (order == null) return;
+        this.editingOrder = order;
+        loadOrderForUpdate(order);
+        modalUpdateOrder.setManaged(true);
+        modalUpdateOrder.setVisible(true);
+    }
+
+    @FXML
+    public void handleCloseUpdateOrderModal() {
+        modalUpdateOrder.setVisible(false);
+        modalUpdateOrder.setManaged(false);
+        updateOrderDetails.clear();
+        this.editingOrder = null;
     }
 
     @FXML
@@ -185,7 +239,7 @@ public class WaiterController {
         txtCustomerPhone.textProperty().addListener((observable, oldValue, newValue) -> {
 
             if (!newValue.matches("\\d*")) {
-                txtCustomerPhone.setText(newValue.replaceAll("[^\\d]", ""));
+                txtCustomerPhone.setText(newValue.replaceAll("\\D", ""));
                 return;
             }
 
@@ -331,7 +385,7 @@ public class WaiterController {
 
         if (selectedZone == null) {
             cmbDeliveryZone.getStyleClass().add("input-error");
-            showAlert(Alert.AlertType.WARNING, "Campo obligatorio", "Selecciona una zona de entrega.");
+            RestaurantAlert.showError(lblUserName.getScene().getWindow(), "Campo obligatorio", "Selecciona una zona de entrega.", "Aceptar");
             return false;
         }
 
@@ -343,7 +397,7 @@ public class WaiterController {
             field.getStyleClass().add("input-error");
         }
         field.requestFocus();
-        showAlert(Alert.AlertType.WARNING, "Campos incompletos", message);
+        RestaurantAlert.showError(lblUserName.getScene().getWindow(), "Campos incompletos", message, "Aceptar");
     }
 
     private void clearDeliveryValidationStyles() {
@@ -358,12 +412,26 @@ public class WaiterController {
     public void handleCreateAndAddProducts() {
         if (viewTableForm.isVisible()) {
             if (this.selectedTable == null) {
-                showAlert(Alert.AlertType.WARNING, "Mesa requerida", "Por favor selecciona una mesa disponible antes de continuar.");
+                RestaurantAlert.showError(lblUserName.getScene().getWindow(), "Mesa requerida", "Por favor selecciona una mesa disponible antes de continuar.", "Aceptar");
                 return;
             }
             lblOrderId.setText("Pedido #" + defaultOrderId + " · " + "Mesa " + selectedTable.getNumberTable());
         }
         else if (viewDeliveryForm.isVisible()) {
+            try {
+                if(orderService.customerHasOpenOrder(txtCustomerPhone.getText().trim())) {
+                    RestaurantAlert.showError(lblUserName.getScene().getWindow(), "Pedido existente", "El cliente con teléfono '" + txtCustomerPhone.getText().trim() + "' ya tiene un pedido abierto." +
+                            " Si desea modificarlo, dirijase a la seccion de pedidos abiertos.", "Aceptar");
+
+                    txtCustomerPhone.clear();
+                    txtDeliveryAddress.clear();
+
+                    return;
+                }
+            } catch (InvalidTextException e) {
+                RestaurantAlert.showError(lblUserName.getScene().getWindow(), "Entrada inválida", e.getMessage(), "Aceptar");
+            }
+
             if (!validateDeliveryForm()) {
                 return;
             }
@@ -374,7 +442,7 @@ public class WaiterController {
                             txtCustomerAddress.getText().trim(),
                             txtCustomerPhone.getText().trim());
                 } catch (InvalidTextException | InvalidCustomerException e) {
-                    showAlert(Alert.AlertType.ERROR, "Cliente no válido", e.getMessage());
+                    RestaurantAlert.showError(lblUserName.getScene().getWindow(), "Cliente no válido", e.getMessage(), "Aceptar");
                 }
             }
 
@@ -402,6 +470,10 @@ public class WaiterController {
 
         viewSectionOrders.setVisible(true);
         viewSectionOrders.setManaged(true);
+
+        selectedOrderDetails.clear();
+        this.selectedFilterCategory = null;
+        renderOrderSummarySection();
     }
 
     public void renderOrderCategories() {
@@ -563,6 +635,7 @@ public class WaiterController {
             emptyOrderStateBox.setManaged(true);
             emptyOrderStateBox.setVisible(true);
             btnSaveOrder.setDisable(true);
+            quantityProducts.setText("Sin productos");
         }
         else {
             emptyOrderStateBox.setManaged(false);
@@ -570,10 +643,11 @@ public class WaiterController {
             spaceForAddedProducts.setManaged(true);
             spaceForAddedProducts.setVisible(true);
             btnSaveOrder.setDisable(false);
+            quantityProducts.setText(selectedOrderDetails.size() + " productos");
         }
 
         containerForAddedProducts.getChildren().clear();
-        containerForAddedProducts.setFillWidth(false);
+        containerForAddedProducts.setFillWidth(true);
 
         for (OrderDetail orderDetail: selectedOrderDetails) {
             containerForAddedProducts.getChildren().add(createOrderSummaryCardNode(orderDetail));
@@ -583,20 +657,16 @@ public class WaiterController {
     private HBox createOrderSummaryCardNode(OrderDetail detail) {
         Product product = detail.getProduct();
 
-        HBox card = new HBox(6.0);
+        HBox card = new HBox(10.0);
         card.getStyleClass().add("order-summary-card");
         card.setAlignment(Pos.CENTER_LEFT);
-        card.setPrefWidth(320.0);
-        card.setMinWidth(320.0);
-        card.setMaxWidth(320.0);
+        card.setMaxWidth(Double.MAX_VALUE);
         card.setMinHeight(Region.USE_PREF_SIZE);
 
         Label lblName = new Label(product.getNameProduct());
         lblName.getStyleClass().add("order-summary-title");
         lblName.setWrapText(true);
-        lblName.setPrefWidth(120.0);
-        lblName.setMinWidth(120.0);
-        lblName.setMaxWidth(120.0);
+        lblName.setMaxWidth(Double.MAX_VALUE);
         lblName.setMinHeight(Region.USE_PREF_SIZE);
 
         Label lblUnitPrice = new Label( String.format("$%,.0f", product.getPriceProduct()).replace(",", ".") + " c/u");
@@ -604,9 +674,8 @@ public class WaiterController {
 
         VBox infoBox = new VBox(2.0, lblName, lblUnitPrice);
         infoBox.setAlignment(Pos.CENTER_LEFT);
-        infoBox.setPrefWidth(120.0);
-        infoBox.setMinWidth(120.0);
-        infoBox.setMaxWidth(120.0);
+        infoBox.setMinWidth(100.0);
+        HBox.setHgrow(infoBox, Priority.ALWAYS);
 
         Button btnMinus = new Button("−");
         btnMinus.getStyleClass().add("btn-qty");
@@ -659,11 +728,339 @@ public class WaiterController {
         lblSubtotal.setText(String.format("$%,.0f", detail.getProduct().getPriceProduct() * detail.getAmount()).replace(",", "."));
     }
 
-    private void showAlert(Alert.AlertType type, String title, String content) {
-        Alert alert = new Alert(type);
-        alert.setTitle(title);
-        alert.setHeaderText(null);
-        alert.setContentText(content);
-        alert.showAndWait();
+    @FXML
+    public void handleSaveOrUpdateOrder() {
+        if (editingOrder != null) {
+            if (updateOrderDetails.isEmpty()) {
+                RestaurantAlert.showError(lblUserName.getScene().getWindow(),
+                        "Pedido vacío",
+                        "No se puede actualizar un pedido sin productos.",
+                        "Aceptar");
+                return;
+            }
+
+            try {
+                int updatedOrderId = editingOrder.getOrderId();
+                orderService.updateOrder(updateOrderDetails, updatedOrderId);
+
+                handleCloseUpdateOrderModal();
+                setupProductComboBox(cmbUpdateOrderCategory.getValue());
+                renderWaiterOrders();
+
+                RestaurantAlert.showSuccess(lblUserName.getScene().getWindow(),
+                        "Pedido actualizado",
+                        "El pedido #" + updatedOrderId + " se ha actualizado correctamente.",
+                        "Aceptar");
+            } catch (InvalidOrderException | OrderNotFoundException
+                    | InvalidOrderDetailException | ProductNotFoundException e) {
+                RestaurantAlert.showError(lblUserName.getScene().getWindow(),
+                        "Error al actualizar el pedido",
+                        e.getMessage(),
+                        "Aceptar");
+            }
+            return;
+        }
+
+        if(selectedOrderDetails.isEmpty()) {
+            RestaurantAlert.showError(lblUserName.getScene().getWindow(), "Pedido vacío", "No se puede guardar un pedido sin productos.", "Aceptar");
+            return;
+        }
+
+        if (viewTableForm.isVisible()) {
+            try {
+                TableOrder newTableOrder = new TableOrder(defaultOrderId, java.time.LocalDateTime.now(), OrderStatus.ABIERTO,
+                        selectedTable);
+
+                for(OrderDetail detail: selectedOrderDetails) {
+                    orderDetailService.addOrderDetail(newTableOrder, detail.getProduct(), detail.getAmount());
+                    productService.updateProductStock(detail.getProduct().getIdProduct(), detail.getProduct().getStockProduct() - detail.getAmount());
+                }
+
+                orderService.addOrder(newTableOrder);
+                orderService.addOrderToWaiter(newTableOrder, idUserLogged);
+                defaultOrderId++;
+
+                RestaurantAlert.showSuccess(lblUserName.getScene().getWindow(), "Pedido guardado", "El pedido de la mesa " + selectedTable.getNumberTable() + " se ha guardado correctamente.", "Aceptar");
+                tableService.updateTableStatus(selectedTable, TableStatus.OCUPADA);
+                selectedTable = null;
+                selectedOrderDetails.clear();
+                this.selectedFilterCategory = null;
+                handleCloseAvailableProducts();
+            } catch (InvalidObjectException | InvalidOrderException | InvalidOrderDetailException
+                    | InvalidProductException | InvalidTableException | TableNotFoundException
+                    | ProductNotFoundException e) {
+                RestaurantAlert.showError(lblUserName.getScene().getWindow(), "Error al guardar el pedido", e.getMessage(), "Aceptar");
+            }
+        }
+        else if(viewDeliveryForm.isVisible()) {
+            try {
+                DeliveryOrder newDeliveryOrder = new DeliveryOrder(defaultOrderId, java.time.LocalDateTime.now(), OrderStatus.ABIERTO,
+                        deliveryAddress, selectedCustomer, selectedZone);
+
+                for(OrderDetail detail: selectedOrderDetails) {
+                    orderDetailService.addOrderDetail(newDeliveryOrder, detail.getProduct(), detail.getAmount());
+                    productService.updateProductStock(detail.getProduct().getIdProduct(), detail.getProduct().getStockProduct() - detail.getAmount());
+                }
+
+                orderService.addOrder(newDeliveryOrder);
+                orderService.addOrderToWaiter(newDeliveryOrder, idUserLogged);
+                defaultOrderId++;
+
+                selectedCustomer = null;
+                deliveryAddress = null;
+                selectedZone = 1;
+                selectedOrderDetails.clear();
+                this.selectedFilterCategory = null;
+                RestaurantAlert.showSuccess(lblUserName.getScene().getWindow(), "Pedido guardado", "El pedido de entrega se ha guardado correctamente.", "Aceptar");
+                handleCloseAvailableProducts();
+            } catch (InvalidObjectException | InvalidOrderException | InvalidOrderDetailException
+                    | InvalidProductException | ProductNotFoundException | InvalidTextException e) {
+                RestaurantAlert.showError(lblUserName.getScene().getWindow(), "Error al guardar el pedido", e.getMessage(), "Aceptar");
+            }
+        }
+        renderWaiterOrders();
     }
+
+    public void loadOrderForUpdate(Order order) {
+        if (order == null) return;
+
+        updateOrderDetails.clear();
+        if (order.getDetails() != null) {
+            for (OrderDetail d : order.getDetails()) {
+                updateOrderDetails.add(new OrderDetail(d.getProduct(), d.getAmount()));
+            }
+        }
+
+        lblIdOrderUpdate.setText("Actualizar pedido #" + order.getOrderId());
+
+        String place = "";
+        if (order instanceof TableOrder tableOrder && tableOrder.getTable() != null) {
+            place = "Mesa " + tableOrder.getTable().getNumberTable();
+        } else if (order instanceof DeliveryOrder) {
+            place = "Domicilio";
+        }
+        lblOrderUpdateDescription.setText((place.isEmpty() ? "" : place + " · ")
+                + "Cambia cantidades, quita productos o agrega nuevos.");
+
+        if (lblUpdateOrderQty != null) {
+            lblUpdateOrderQty.setText("1");
+        }
+        setupProductComboBox(cmbUpdateOrderCategory.getValue());
+
+        renderUpdateOrderProducts();
+    }
+
+    public void renderUpdateOrderProducts() {
+        containerForProductsInOrder.getChildren().clear();
+        for (OrderDetail detail : updateOrderDetails) {
+            containerForProductsInOrder.getChildren().add(createUpdateOrderRow(detail));
+        }
+        refreshUpdateOrderSubtotal();
+    }
+
+    private HBox createUpdateOrderRow(OrderDetail detail) {
+        Product product = detail.getProduct();
+
+        Label lblName = new Label(product.getNameProduct());
+        lblName.getStyleClass().add("order-summary-title");
+        lblName.setWrapText(true);
+
+        Label lblUnitPrice = new Label(formatMoney(product.getPriceProduct()) + " c/u");
+        lblUnitPrice.getStyleClass().add("order-summary-unit-price");
+
+        StackPane trashIcon = new StackPane();
+        trashIcon.getStyleClass().addAll("icon-svg", "icon-trash");
+        Button btnRemove = new Button("Quitar", trashIcon);
+        btnRemove.getStyleClass().add("btn-remove-item");
+
+        VBox infoBox = new VBox(6.0, lblName, lblUnitPrice, btnRemove);
+        infoBox.setAlignment(Pos.CENTER_LEFT);
+        infoBox.setFillWidth(false);
+
+        Button btnMinus = new Button("−");
+        btnMinus.getStyleClass().add("btn-qty");
+        Label lblQty = new Label(String.valueOf(detail.getAmount()));
+        lblQty.getStyleClass().add("order-summary-qty");
+        lblQty.setMinWidth(24.0);
+        lblQty.setAlignment(Pos.CENTER);
+        Button btnPlus = new Button("+");
+        btnPlus.getStyleClass().add("btn-qty");
+
+        HBox qtyBox = new HBox(8.0, btnMinus, lblQty, btnPlus);
+        qtyBox.getStyleClass().add("qty-box");
+        qtyBox.setAlignment(Pos.CENTER);
+        qtyBox.setMinWidth(Region.USE_PREF_SIZE);
+        qtyBox.setMaxHeight(Region.USE_PREF_SIZE);
+
+        Label lblLineSubtotal = new Label(formatMoney(product.getPriceProduct() * detail.getAmount()));
+        lblLineSubtotal.getStyleClass().add("update-order-line-subtotal");
+        lblLineSubtotal.setMinWidth(70.0);
+        lblLineSubtotal.setAlignment(Pos.CENTER_RIGHT);
+
+        HBox rightBox = new HBox(14.0, qtyBox, lblLineSubtotal);
+        rightBox.setAlignment(Pos.CENTER_RIGHT);
+        rightBox.setMinWidth(Region.USE_PREF_SIZE);
+
+        Region spacer = new Region();
+        HBox.setHgrow(spacer, Priority.ALWAYS);
+
+        HBox row = new HBox(12.0, infoBox, spacer, rightBox);
+        row.getStyleClass().add("order-summary-card");
+        row.setAlignment(Pos.TOP_LEFT);
+        row.setMinHeight(Region.USE_PREF_SIZE);
+        row.setPadding(new javafx.geometry.Insets(12, 0, 12, 0));
+        rightBox.setPadding(new javafx.geometry.Insets(2, 0, 0, 0));
+
+        btnPlus.setOnAction(e -> {
+            detail.setAmount(detail.getAmount() + 1);
+            refreshUpdateOrderRow(detail, lblQty, lblLineSubtotal);
+        });
+
+        btnMinus.setOnAction(e -> {
+            if (detail.getAmount() > 1) {
+                detail.setAmount(detail.getAmount() - 1);
+                refreshUpdateOrderRow(detail, lblQty, lblLineSubtotal);
+            }
+        });
+
+        btnRemove.setOnAction(e -> {
+            updateOrderDetails.remove(detail);
+            renderUpdateOrderProducts();
+        });
+
+        return row;
+    }
+
+    private void refreshUpdateOrderRow(OrderDetail detail, Label lblQty, Label lblLineSubtotal) {
+        lblQty.setText(String.valueOf(detail.getAmount()));
+        lblLineSubtotal.setText(formatMoney(detail.getProduct().getPriceProduct() * detail.getAmount()));
+        refreshUpdateOrderSubtotal();
+    }
+
+    private void refreshUpdateOrderSubtotal() {
+        double total = updateOrderDetails.stream()
+                .mapToDouble(d -> d.getProduct().getPriceProduct() * d.getAmount())
+                .sum();
+        lblUpdateOrderSubtotal.setText(formatMoney(total));
+    }
+
+    private String formatMoney(double value) {
+        return String.format("$%,.0f", value).replace(",", ".");
+    }
+
+    public void renderWaiterOrders() {
+        ordersContainer.getChildren().clear();
+
+        try {
+            List<Order> allOrders = userService.getOrdersByWaiterId(idUserLogged);
+
+            for (Order order : allOrders) {
+                VBox orderCard = ReusableCards.createWaiterCardNode(order, orderService, this::handleUpdateOrder);
+                ordersContainer.getChildren().add(orderCard);
+            }
+        } catch (UserNotFoundException e) {
+            RestaurantAlert.showError(lblUserName.getScene().getWindow(), "Error", e.getMessage(), "Aceptar");
+        }
+    }
+
+    private void setupCategoryComboBox() {
+        List<Category> categories = categoryService.getCategories();
+        cmbUpdateOrderCategory.getItems().setAll(categories);
+
+        cmbUpdateOrderCategory.setConverter(new javafx.util.StringConverter<Category>() {
+            @Override
+            public String toString(Category category) {
+                return category != null ? category.getCategoryName() : "";
+            }
+
+            @Override
+            public Category fromString(String string) {
+                return null;
+            }
+        });
+
+        cmbUpdateOrderProduct.setConverter(new javafx.util.StringConverter<Product>() {
+            @Override
+            public String toString(Product product) {
+                return product != null ? product.getNameProduct() : "";
+            }
+
+            @Override
+            public Product fromString(String string) {
+                return null;
+            }
+        });
+
+        cmbUpdateOrderCategory.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+            setupProductComboBox(newValue);
+        });
+
+        cmbUpdateOrderCategory.getSelectionModel().selectFirst();
+    }
+
+    private void setupProductComboBox(Category category) {
+        if(category == null) {
+            cmbUpdateOrderProduct.getItems().clear();
+            return;
+        }
+
+        List<Product> products = new ArrayList<>();
+
+        for(Product product : category.getProducts()) {
+            if(product.isAvailabilityProduct())
+                products.add(product);
+        }
+
+        if(products.isEmpty()) {
+            cmbUpdateOrderProduct.getItems().clear();
+            return;
+        }
+
+        cmbUpdateOrderProduct.getItems().setAll(products);
+        cmbUpdateOrderProduct.getSelectionModel().selectFirst();
+    }
+
+    @FXML
+    public void handleUpdateOrderQtyMinus() {
+        int currentQty = Integer.parseInt(lblUpdateOrderQty.getText());
+        if (currentQty > 1) {
+            lblUpdateOrderQty.setText(String.valueOf(currentQty - 1));
+        }
+    }
+
+    @FXML
+    public void handleUpdateOrderQtyPlus() {
+        int currentQty = Integer.parseInt(lblUpdateOrderQty.getText());
+        lblUpdateOrderQty.setText(String.valueOf(currentQty + 1));
+    }
+
+    @FXML
+    public void handleAddProductToUpdateOrder() {
+        Product selectedProduct = cmbUpdateOrderProduct.getValue();
+        if (selectedProduct == null) {
+            RestaurantAlert.showError(lblUserName.getScene().getWindow(), "Producto no seleccionado", "Por favor selecciona un producto para agregar.", "Aceptar");
+            return;
+        }
+
+        int quantityToAdd = Integer.parseInt(lblUpdateOrderQty.getText());
+        Optional<OrderDetail> existingDetailOpt = updateOrderDetails.stream()
+                .filter(d -> d.getProduct().getIdProduct() == selectedProduct.getIdProduct())
+                .findFirst();
+
+        if (existingDetailOpt.isPresent()) {
+            OrderDetail existingDetail = existingDetailOpt.get();
+            existingDetail.setAmount(existingDetail.getAmount() + quantityToAdd);
+        } else {
+            updateOrderDetails.add(new OrderDetail(selectedProduct, quantityToAdd));
+        }
+
+        lblUpdateOrderQty.setText("1");
+        renderUpdateOrderProducts();
+    }
+
+    private void handleInvoiceOrder(Order order) {
+
+    }
+
+
 }

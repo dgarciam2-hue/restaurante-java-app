@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -16,17 +17,13 @@ public abstract class Order {
     protected List<OrderDetail> details;
     protected OrderStatus orderStatus;
 
-    public Order(int orderId, LocalDateTime date, List<OrderDetail> details, OrderStatus orderStatus) throws InvalidObjectException, InvalidOrderException {
+    public Order(int orderId, LocalDateTime date, OrderStatus orderStatus) throws InvalidObjectException, InvalidOrderException {
         this.orderId = orderId;
 
         Validates.validateObject(date, "La fecha no puede ser nula");
-        if(details.isEmpty()) {
-            throw new InvalidOrderException("La lista de productos no puede estar vacía");
-        }
         Validates.validateObject(orderStatus, "El estado del pedido no puede ser nulo");
-
+        this.details = new ArrayList<>();
         this.date = date;
-        this.details = details;
         this.orderStatus = orderStatus;
     }
 
